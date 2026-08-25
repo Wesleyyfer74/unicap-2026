@@ -1,0 +1,28 @@
+import { z } from 'zod';
+
+const idSchema = z.object({ id: z.coerce.number().int().positive('ID inválido') }).strict();
+const turnoSchema = z.enum(['MATUTINO', 'INTEGRAL', 'NOTURNO']);
+const corOnibusSchema = z.string().trim().min(2, 'Selecione a cor do ônibus').max(50, 'Cor do ônibus muito longa');
+
+export const listChamadasSchema = z.object({ query: z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+  fiscalId: z.coerce.number().int().positive().optional(),
+  turno: turnoSchema.optional(),
+  status: z.enum(['ABERTA', 'FINALIZADA']).optional(),
+  data: z.string().date().optional(),
+}).strict() });
+export const createChamadaSchema = z.object({ body: z.object({ fiscalId: z.coerce.number().int().positive('Fiscal inválido'), turno: turnoSchema, corOnibus: corOnibusSchema }).strict() });
+export const chamadaIdSchema = z.object({ params: idSchema });
+export const chamadaDetailsSchema = z.object({ params: idSchema, query: z.object({
+  presencasLimit: z.coerce.number().int().min(1).max(50).default(20),
+  ocorrenciasLimit: z.coerce.number().int().min(1).max(50).default(10),
+}).strict() });
+export const createPresencaSchema = z.object({ params: idSchema, body: z.object({ uuid: z.string().uuid('UUID inválido') }).strict() });
+export const scannerAlunoSchema = z.object({ params: idSchema.extend({ uuid: z.string().uuid('UUID inválido') }) });
+export const listPresencasChamadaSchema = z.object({ params: idSchema, query: z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+  search: z.string().trim().max(191).optional().default(''),
+}).strict() });
+export const removePresencaSchema = z.object({ params: idSchema.extend({ presencaId: z.coerce.number().int().positive('Presença inválida') }) });

@@ -1,0 +1,45 @@
+{
+  "name": "@sistema-transporte/server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "test": "node --test --test-concurrency=1 tests/system.integration.test.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:seed": "prisma db seed",
+    "prisma:studio": "prisma studio",
+    "import:students": "node scripts/import-students-xls.js"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@prisma/adapter-mariadb": "^6.19.2",
+    "@prisma/client": "^6.19.2",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mariadb": "^3.4.5",
+    "morgan": "^1.10.1",
+    "pdfkit": "^0.19.1",
+    "prisma": "^6.19.2",
+    "qrcode": "^1.5.4",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "xlsx": "^0.18.5"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}

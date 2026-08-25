@@ -1,0 +1,147 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Turno {
+  MATUTINO
+  INTEGRAL
+  NOTURNO
+}
+
+enum StatusChamada {
+  ABERTA
+  FINALIZADA
+}
+
+model Administrador {
+  id           Int      @id @default(autoincrement())
+  nome         String   @db.VarChar(191)
+  email        String   @unique @db.VarChar(191)
+  passwordHash String   @db.VarChar(255)
+  tokenVersion Int      @default(0)
+  ativo        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("administradores")
+}
+
+model Fiscal {
+  id          Int          @id @default(autoincrement())
+  nome        String       @db.VarChar(191)
+  ativo       Boolean      @default(true)
+  deletedAt   DateTime?
+  chamadas    Chamada[]
+  ocorrencias Ocorrencia[]
+  viagens     Viagem[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([nome])
+  @@index([ativo])
+  @@index([deletedAt])
+  @@map("fiscais")
+}
+
+model Aluno {
+  id           Int          @id @default(autoincrement())
+  uuid         String       @unique @default(uuid()) @db.Char(36)
+  cpfHash      String?      @unique @db.Char(64)
+  nomeCompleto String       @db.VarChar(191)
+  ativo        Boolean      @default(true)
+  motivoInativacao String? @db.Text
+  desativadoEm DateTime?
+  deletedAt    DateTime?
+  presencas    Presenca[]
+  ocorrencias  Ocorrencia[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([nomeCompleto])
+  @@index([ativo])
+  @@index([deletedAt])
+  @@map("alunos")
+}
+
+model Chamada {
+  id          Int           @id @default(autoincrement())
+  fiscalId    Int
+  turno       Turno
+  corOnibus   String        @default("Não informada") @db.VarChar(50)
+  data        DateTime      @db.Date
+  status      StatusChamada @default(ABERTA)
+  startedAt   DateTime      @default(now())
+  finishedAt  DateTime?
+  fiscal      Fiscal        @relation(fields: [fiscalId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  presencas   Presenca[]
+  ocorrencias Ocorrencia[]
+  viagem      Viagem?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([fiscalId])
+  @@index([data, turno])
+  @@index([status])
+  @@map("chamadas")
+}
+
+model Presenca {
+  id           Int      @id @default(autoincrement())
+  chamadaId    Int
+  alunoId      Int
+  registradoEm DateTime @default(now())
+  createdAt    DateTime @default(now())
+  chamada      Chamada  @relation(fields: [chamadaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  aluno        Aluno    @relation(fields: [alunoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([chamadaId, alunoId])
+  @@index([alunoId])
+  @@index([registradoEm])
+  @@map("presencas")
+}
+
+model Ocorrencia {
+  id         Int      @id @default(autoincrement())
+  chamadaId  Int
+  alunoId    Int
+  fiscalId   Int
+  observacao String   @db.Text
+  chamada    Chamada  @relation(fields: [chamadaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  aluno      Aluno    @relation(fields: [alunoId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  fiscal     Fiscal   @relation(fields: [fiscalId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([chamadaId])
+  @@index([alunoId])
+  @@index([chamadaId, alunoId])
+  @@index([fiscalId])
+  @@index([createdAt])
+  @@map("ocorrencias")
+}
+
+model Viagem {
+  id               Int       @id @default(autoincrement())
+  chamadaId        Int       @unique
+  nomeMotorista    String    @db.VarChar(191)
+  fiscalId         Int
+  linhaRota        String?   @db.VarChar(191)
+  turno            Turno?
+  horarioSaida     DateTime? @db.Time(0)
+  horarioChegada   DateTime? @db.Time(0)
+  hodometroSaida   Decimal?  @db.Decimal(10, 1)
+  hodometroChegada Decimal?  @db.Decimal(10, 1)
+  chamada          Chamada   @relation(fields: [chamadaId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  fiscal           Fiscal    @relation(fields: [fiscalId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([fiscalId])
+  @@map("viagens")
+}

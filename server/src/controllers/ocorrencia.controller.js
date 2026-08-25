@@ -1,0 +1,5 @@
+import * as ocorrenciaService from '../services/ocorrencia.service.js';
+export async function create(request, response, next) { try { return response.status(201).json({ ocorrencia: await ocorrenciaService.create(request.validated.params.id, request.validated.body.alunoId, request.validated.body.observacao) }); } catch (error) { return next(error); } }
+export async function list(request, response, next) { try { return response.json(await ocorrenciaService.list(request.validated.query)); } catch (error) { return next(error); } }
+export async function findById(request, response, next) { try { return response.json({ ocorrencia: await ocorrenciaService.findById(request.validated.params.id) }); } catch (error) { return next(error); } }
+export async function update(request, response, next) { try { return response.json({ ocorrencia: await ocorrenciaService.update(request.validated.params.id, request.validated.body.observacao) }); } catch (error) { return next(error); } }

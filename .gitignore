@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+client/.env
+server/.env
+*.xls
+*.xlsx
+*.sql
+!server/prisma/migrations/**/migration.sql
+*.zip
+*.pdf

@@ -1,0 +1,26 @@
+import { Router } from 'express';
+import * as chamadaController from '../controllers/chamada.controller.js';
+import { authenticate } from '../middlewares/auth.middleware.js';
+import { validate } from '../middlewares/validate.middleware.js';
+import { chamadaDetailsSchema, chamadaIdSchema, createChamadaSchema, createPresencaSchema, listChamadasSchema, listPresencasChamadaSchema, removePresencaSchema, scannerAlunoSchema } from '../validators/chamada.validator.js';
+import { createViagemSchema, updateViagemSchema, viagemIdSchema } from '../validators/viagem.validator.js';
+import * as viagemController from '../controllers/viagem.controller.js';
+import { createOcorrenciaSchema } from '../validators/ocorrencia.validator.js';
+import * as ocorrenciaController from '../controllers/ocorrencia.controller.js';
+
+const router = Router();
+router.use(authenticate);
+router.get('/', validate(listChamadasSchema), chamadaController.list);
+router.post('/', validate(createChamadaSchema), chamadaController.create);
+router.get('/:id/detalhes', validate(chamadaDetailsSchema), chamadaController.findDetails);
+router.get('/:id', validate(chamadaIdSchema), chamadaController.findById);
+router.get('/:id/scanner/alunos/:uuid', validate(scannerAlunoSchema), chamadaController.identifyStudent);
+router.patch('/:id/finalizar', validate(chamadaIdSchema), chamadaController.finish);
+router.get('/:id/presencas', validate(listPresencasChamadaSchema), chamadaController.listPresences);
+router.post('/:id/presencas', validate(createPresencaSchema), chamadaController.addPresence);
+router.delete('/:id/presencas/:presencaId', validate(removePresencaSchema), chamadaController.removePresence);
+router.post('/:id/viagem', validate(createViagemSchema), viagemController.create);
+router.get('/:id/viagem', validate(viagemIdSchema), viagemController.findByCall);
+router.put('/:id/viagem', validate(updateViagemSchema), viagemController.update);
+router.post('/:id/ocorrencias', validate(createOcorrenciaSchema), ocorrenciaController.create);
+export default router;
