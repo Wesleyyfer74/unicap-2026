@@ -20,7 +20,12 @@ const app = express();
 app.disable('x-powered-by');
 if (env.TRUST_PROXY) app.set('trust proxy', 1);
 app.use(helmet());
-app.use(cors((request, callback) => {
+
+// Mantém a verificação de disponibilidade independente do banco e do CORS.
+// A Hostinger pode consultar este endpoint usando uma origem interna própria.
+app.get('/api/health', (_request, response) => response.status(200).json({ ok: true }));
+
+const apiCors = cors((request, callback) => {
   const origin = request.get('origin');
   const forwardedHost = request.get('x-forwarded-host')?.split(',')[0]?.trim();
   const forwardedProtocol = request.get('x-forwarded-proto')?.split(',')[0]?.trim();
@@ -38,7 +43,11 @@ app.use(cors((request, callback) => {
   const error = new Error('Origem não permitida pelo CORS');
   error.status = 403;
   return callback(error);
-}));
+});
+
+// CORS é uma proteção para chamadas de API feitas pelo navegador. Aplicá-lo
+// aos arquivos do React também bloquearia probes internos e a página inicial.
+app.use('/api', apiCors);
 app.use(globalLimiter);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: false, limit: '100kb', parameterLimit: 100 }));
