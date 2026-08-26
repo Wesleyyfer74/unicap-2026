@@ -1,9 +1,8 @@
 import 'dotenv/config';
 import bcrypt from 'bcrypt';
-import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
+import { prisma } from '../src/config/prisma.js';
 
-const prisma = new PrismaClient();
 const adminSchema = z.object({
   ADMIN_NAME: z.string().trim().min(2),
   ADMIN_EMAIL: z.string().trim().email().transform((email) => email.toLowerCase()),
