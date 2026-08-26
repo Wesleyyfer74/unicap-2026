@@ -12,6 +12,7 @@ const targetSecret = process.env.TARGET_CPF_HASH_SECRET;
 const spreadsheetPath = resolve(process.cwd(), process.argv[2] || '../relatorioSociosCompletos (14).xls');
 const dumpPath = resolve(process.cwd(), process.argv[3] || 'alunos-planilha-hostinger.sql');
 const correctionPath = resolve(process.cwd(), process.argv[4] || 'corrigir-cpfs-hostinger.sql');
+const syncPath = resolve(process.cwd(), process.argv[5] || 'sincronizar-alunos-hostinger.sql');
 
 if (!sourceSecret || sourceSecret.length < 32) throw new Error('Chave de origem inválida em server/.env.');
 if (!targetSecret || targetSecret.length < 32) throw new Error('Defina TARGET_CPF_HASH_SECRET com a chave usada na Hostinger.');
@@ -73,6 +74,35 @@ fs.writeFileSync(correctionPath, [
   '',
 ].join('\n'), 'utf8');
 
+const escapeSql = (value) => value.replaceAll('\\', '\\\\').replaceAll("'", "''");
+const syncRows = students.map((student) =>
+  `('${escapeSql(student.name)}','${hash(student.cpf, targetSecret)}')`);
+fs.writeFileSync(syncPath, [
+  '-- Sincroniza alunos pelo nome da planilha sem armazenar CPF em texto puro.',
+  'SET NAMES utf8mb4;',
+  'START TRANSACTION;',
+  'CREATE TEMPORARY TABLE `tmp_alunos_planilha` (',
+  '  `nomeCompleto` VARCHAR(191) NOT NULL PRIMARY KEY,',
+  '  `cpfHash` VARCHAR(64) NOT NULL UNIQUE',
+  ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
+  `INSERT INTO \`tmp_alunos_planilha\` (\`nomeCompleto\`, \`cpfHash\`) VALUES\n${syncRows.join(',\n')};`,
+  'UPDATE `alunos` AS a',
+  'INNER JOIN `tmp_alunos_planilha` AS t ON TRIM(a.`nomeCompleto`) = t.`nomeCompleto`',
+  'SET a.`cpfHash` = t.`cpfHash`, a.`updatedAt` = CURRENT_TIMESTAMP(3)',
+  'WHERE a.`deletedAt` IS NULL;',
+  'INSERT INTO `alunos` (`uuid`, `cpfHash`, `nomeCompleto`, `ativo`, `createdAt`, `updatedAt`)',
+  'SELECT UUID(), t.`cpfHash`, t.`nomeCompleto`, 1, CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)',
+  'FROM `tmp_alunos_planilha` AS t',
+  'WHERE NOT EXISTS (SELECT 1 FROM `alunos` AS a WHERE a.`cpfHash` = t.`cpfHash`)',
+  '  AND NOT EXISTS (SELECT 1 FROM `alunos` AS a WHERE TRIM(a.`nomeCompleto`) = t.`nomeCompleto` AND a.`deletedAt` IS NULL);',
+  'COMMIT;',
+  'SELECT COUNT(*) AS alunosReconhecidos FROM `alunos` AS a',
+  'INNER JOIN `tmp_alunos_planilha` AS t ON a.`cpfHash` = t.`cpfHash`',
+  'WHERE a.`deletedAt` IS NULL;',
+  'DROP TEMPORARY TABLE `tmp_alunos_planilha`;',
+  '',
+].join('\n'), 'utf8');
+
 console.log(JSON.stringify({
   linhasAuditadas: students.length,
   cpfsValidosUnicos: new Set(students.map(({ cpf }) => cpf)).size,
@@ -80,4 +110,5 @@ console.log(JSON.stringify({
   duplicados: duplicateCpfs.length,
   dumpAtualizado: dumpPath,
   correcaoBancoExistente: correctionPath,
+  sincronizacaoPorNome: syncPath,
 }));
