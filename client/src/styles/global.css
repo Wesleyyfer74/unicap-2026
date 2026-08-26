@@ -545,3 +545,127 @@ input, select, textarea { width: 100%; max-width: 100%; }
 .blocked-student strong { color: var(--unicap-navy); font-size: clamp(1.4rem, 6vw, 1.9rem); overflow-wrap: anywhere; text-transform: uppercase; }
 .blocked-student p { margin: .15rem 0 0; color: #721f19; font-size: 1.05rem; font-weight: 700; line-height: 1.45; white-space: pre-wrap; }
 @media (max-width: 700px) { .blocked-student { padding: 1.15rem .8rem; } .blocked-student + .modal-actions .button { min-height: 56px; font-size: 1.05rem; } }
+
+/* Manual de uso integrado ao dashboard */
+.dashboard-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+}
+.dashboard-heading-actions .button { margin: 0; }
+.help-button {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border: 2px solid var(--unicap-navy);
+  border-radius: 50%;
+  background: white;
+  color: var(--unicap-navy);
+  box-shadow: 0 .3rem .8rem rgb(7 31 69 / 12%);
+  font-size: 1.45rem;
+  font-weight: 900;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.help-button:hover,
+.help-button:focus-visible {
+  border-color: var(--unicap-red);
+  background: var(--unicap-red);
+  color: white;
+  outline: 3px solid rgb(229 59 47 / 20%);
+  outline-offset: 2px;
+}
+.help-modal {
+  display: flex;
+  width: min(100%, 58rem);
+  max-height: calc(100dvh - 2rem);
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.help-modal > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.35rem 1.5rem 1rem;
+  border-bottom: 1px solid #dce3eb;
+}
+.help-modal > header h2 { margin: .2rem 0 0; color: var(--unicap-navy); }
+.help-eyebrow {
+  color: var(--unicap-red);
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.help-intro {
+  margin: 0;
+  padding: .9rem 1.5rem;
+  background: #f4f7fb;
+  color: #536174;
+  line-height: 1.5;
+}
+.help-content {
+  padding: 1rem 1.5rem 1.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.help-content article {
+  padding: 1rem;
+  border: 1px solid #dce3eb;
+  border-radius: .75rem;
+  background: white;
+}
+.help-content article + article { margin-top: .8rem; }
+.help-content article > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+.help-content h3 { margin: 0; color: var(--unicap-navy); font-size: 1.05rem; }
+.help-content article > header span {
+  flex: 0 0 auto;
+  padding: .3rem .55rem;
+  border-radius: 999px;
+  background: #e8f0fb;
+  color: #123f76;
+  font-size: .72rem;
+  font-weight: 800;
+}
+.help-content ol { margin: .75rem 0 0; padding-left: 1.35rem; }
+.help-content li { margin: .45rem 0; color: #465468; line-height: 1.5; }
+.help-modal > footer {
+  padding: .85rem 1.5rem;
+  border-top: 1px solid #dce3eb;
+  background: white;
+}
+.help-modal > footer .button { min-width: 9rem; margin: 0; }
+
+@media (max-width: 700px) {
+  .dashboard-heading-actions {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+  .dashboard-heading-actions .button { width: 100%; }
+  .help-button { width: 50px; height: 50px; }
+  .help-backdrop { padding: .5rem; }
+  .help-modal {
+    width: 100%;
+    height: calc(100dvh - 1rem);
+    max-height: calc(100dvh - 1rem);
+    border-radius: .85rem;
+  }
+  .help-modal > header { padding: 1rem; }
+  .help-modal > header h2 { font-size: 1.25rem; }
+  .help-intro { padding: .8rem 1rem; }
+  .help-content { padding: .8rem 1rem 1rem; }
+  .help-content article { padding: .85rem; }
+  .help-content article > header { align-items: flex-start; flex-direction: column; }
+  .help-modal > footer { padding: .75rem 1rem max(.75rem, env(safe-area-inset-bottom)); }
+  .help-modal > footer .button { width: 100%; min-height: 52px; }
+}
