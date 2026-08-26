@@ -6,6 +6,14 @@ import Modal from "../../components/Modal";
 import { alunoService } from "../../services/aluno.service";
 
 const initialPagination = { page: 1, limit: 10, total: 0, totalPages: 1 };
+const formatSearchValue = (value) => {
+  if (!/^[\d.\-\s]*$/.test(value)) return value;
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  return digits
+    .replace(/^(\d{3})(\d)/, "$1.$2")
+    .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+};
 
 export default function AlunosPage() {
   const [alunos, setAlunos] = useState([]);
@@ -28,7 +36,7 @@ export default function AlunosPage() {
     const timer = setTimeout(() => {
       setSearch(searchInput.trim());
       setPagination((old) => ({ ...old, page: 1 }));
-    }, 350);
+    }, 180);
     return () => clearTimeout(timer);
   }, [searchInput]);
   const loadAlunos = useCallback(async () => {
@@ -162,9 +170,12 @@ export default function AlunosPage() {
             <span>Pesquisar</span>
             <input
               type="search"
-                placeholder="Nome ou CPF do aluno"
+              placeholder="Nome ou CPF do aluno"
+              autoComplete="off"
               value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
+              onChange={(event) =>
+                setSearchInput(formatSearchValue(event.target.value))
+              }
             />
           </label>
           <label>
@@ -185,10 +196,10 @@ export default function AlunosPage() {
         <div className="table-wrapper">
           <table>
             <thead>
-                <tr>
-                  <th>Nome</th>
-                  <th>CPF</th>
-                  <th>UUID</th>
+              <tr>
+                <th>Nome</th>
+                <th>CPF</th>
+                <th>UUID</th>
                 <th>Status</th>
                 <th>Cadastro</th>
                 <th>Ações</th>
@@ -212,7 +223,9 @@ export default function AlunosPage() {
                   <tr key={aluno.id}>
                     <td data-label="Nome">{aluno.nomeCompleto}</td>
                     <td data-label="CPF">
-                      <span className="cpf-value">{aluno.cpf || 'Não informado'}</span>
+                      <span className="cpf-value">
+                        {aluno.cpf || "Não informado"}
+                      </span>
                     </td>
                     <td data-label="UUID">
                       <code className="uuid">{aluno.uuid}</code>
