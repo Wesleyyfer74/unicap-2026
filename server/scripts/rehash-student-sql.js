@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { createHmac } from 'node:crypto';
+import { createCipheriv, createHash, createHmac, randomBytes } from 'node:crypto';
 import { resolve } from 'node:path';
 import { createRequire } from 'node:module';
 import dotenv from 'dotenv';
@@ -19,6 +19,13 @@ if (!targetSecret || targetSecret.length < 32) throw new Error('Defina TARGET_CP
 
 const normalizeCpf = (value) => String(value ?? '').replace(/\D/g, '').padStart(11, '0');
 const hash = (cpf, secret) => createHmac('sha256', secret).update(cpf).digest('hex');
+const encryptionKey = createHash('sha256').update(`cpf-encryption:${targetSecret}`).digest();
+const encrypt = (cpf) => {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv('aes-256-gcm', encryptionKey, iv);
+  const encrypted = Buffer.concat([cipher.update(cpf, 'utf8'), cipher.final()]);
+  return ['v1', iv.toString('base64url'), cipher.getAuthTag().toString('base64url'), encrypted.toString('base64url')].join(':');
+};
 
 function validCpf(cpf) {
   if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
@@ -76,22 +83,23 @@ fs.writeFileSync(correctionPath, [
 
 const escapeSql = (value) => value.replaceAll('\\', '\\\\').replaceAll("'", "''");
 const syncRows = students.map((student) =>
-  `('${escapeSql(student.name)}','${hash(student.cpf, targetSecret)}')`);
+  `('${escapeSql(student.name)}','${hash(student.cpf, targetSecret)}','${encrypt(student.cpf)}')`);
 fs.writeFileSync(syncPath, [
   '-- Sincroniza alunos pelo nome da planilha sem armazenar CPF em texto puro.',
   'SET NAMES utf8mb4;',
   'START TRANSACTION;',
   'CREATE TEMPORARY TABLE `tmp_alunos_planilha` (',
   '  `nomeCompleto` VARCHAR(191) NOT NULL PRIMARY KEY,',
-  '  `cpfHash` VARCHAR(64) NOT NULL UNIQUE',
+  '  `cpfHash` VARCHAR(64) NOT NULL UNIQUE,',
+  '  `cpfEncrypted` VARCHAR(255) NOT NULL',
   ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;',
-  `INSERT INTO \`tmp_alunos_planilha\` (\`nomeCompleto\`, \`cpfHash\`) VALUES\n${syncRows.join(',\n')};`,
+  `INSERT INTO \`tmp_alunos_planilha\` (\`nomeCompleto\`, \`cpfHash\`, \`cpfEncrypted\`) VALUES\n${syncRows.join(',\n')};`,
   'UPDATE `alunos` AS a',
   'INNER JOIN `tmp_alunos_planilha` AS t ON TRIM(a.`nomeCompleto`) = t.`nomeCompleto`',
-  'SET a.`cpfHash` = t.`cpfHash`, a.`updatedAt` = CURRENT_TIMESTAMP(3)',
+  'SET a.`cpfHash` = t.`cpfHash`, a.`cpfEncrypted` = t.`cpfEncrypted`, a.`updatedAt` = CURRENT_TIMESTAMP(3)',
   'WHERE a.`deletedAt` IS NULL;',
-  'INSERT INTO `alunos` (`uuid`, `cpfHash`, `nomeCompleto`, `ativo`, `createdAt`, `updatedAt`)',
-  'SELECT UUID(), t.`cpfHash`, t.`nomeCompleto`, 1, CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)',
+  'INSERT INTO `alunos` (`uuid`, `cpfHash`, `cpfEncrypted`, `nomeCompleto`, `ativo`, `createdAt`, `updatedAt`)',
+  'SELECT UUID(), t.`cpfHash`, t.`cpfEncrypted`, t.`nomeCompleto`, 1, CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)',
   'FROM `tmp_alunos_planilha` AS t',
   'WHERE NOT EXISTS (SELECT 1 FROM `alunos` AS a WHERE a.`cpfHash` = t.`cpfHash`)',
   '  AND NOT EXISTS (SELECT 1 FROM `alunos` AS a WHERE TRIM(a.`nomeCompleto`) = t.`nomeCompleto` AND a.`deletedAt` IS NULL);',

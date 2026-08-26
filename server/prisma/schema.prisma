@@ -53,6 +53,7 @@ model Aluno {
   id           Int          @id @default(autoincrement())
   uuid         String       @unique @default(uuid()) @db.Char(36)
   cpfHash      String?      @unique @db.Char(64)
+  cpfEncrypted String?      @db.VarChar(255)
   nomeCompleto String       @db.VarChar(191)
   ativo        Boolean      @default(true)
   motivoInativacao String? @db.Text

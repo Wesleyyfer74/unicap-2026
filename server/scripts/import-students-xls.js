@@ -1,12 +1,13 @@
 import 'dotenv/config';
-import { createHmac } from 'node:crypto';
+import { createCipheriv, createHash, createHmac, randomBytes } from 'node:crypto';
 import { resolve } from 'node:path';
 import { createRequire } from 'node:module';
 import { PrismaClient } from '@prisma/client';
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
 const require = createRequire(import.meta.url);
 const XLSX = require('xlsx');
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ adapter: new PrismaMariaDb(process.env.DATABASE_URL) });
 const secret = process.env.CPF_HASH_SECRET || process.env.JWT_SECRET;
 const normalizeCpf = (value) => String(value ?? '').replace(/\D/g, '');
 
@@ -22,6 +23,13 @@ function validCpf(cpf) {
 }
 
 const hashCpf = (cpf) => createHmac('sha256', secret).update(cpf).digest('hex');
+const encryptionKey = createHash('sha256').update(`cpf-encryption:${secret}`).digest();
+const encryptCpf = (cpf) => {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv('aes-256-gcm', encryptionKey, iv);
+  const encrypted = Buffer.concat([cipher.update(cpf, 'utf8'), cipher.final()]);
+  return ['v1', iv.toString('base64url'), cipher.getAuthTag().toString('base64url'), encrypted.toString('base64url')].join(':');
+};
 
 async function main() {
   if (!secret || secret.length < 32) throw new Error('Configure CPF_HASH_SECRET com pelo menos 32 caracteres antes da importação.');
@@ -34,25 +42,25 @@ async function main() {
     const nomeCompleto = String(row.Nome ?? '').trim().replace(/\s+/g, ' ');
     const cpf = normalizeCpf(row.CPF);
     if (nomeCompleto.length < 2 || !validCpf(cpf)) { invalidos += 1; continue; }
-    unique.set(hashCpf(cpf), nomeCompleto);
+    unique.set(hashCpf(cpf), { nomeCompleto, cpfEncrypted: encryptCpf(cpf) });
   }
 
   let criados = 0;
   let vinculados = 0;
   let atualizados = 0;
-  for (const [cpfHash, nomeCompleto] of unique) {
+  for (const [cpfHash, { nomeCompleto, cpfEncrypted }] of unique) {
     const existing = await prisma.aluno.findUnique({ where: { cpfHash }, select: { id: true, nomeCompleto: true } });
     if (existing) {
-      if (existing.nomeCompleto !== nomeCompleto) await prisma.aluno.update({ where: { id: existing.id }, data: { nomeCompleto } });
+      await prisma.aluno.update({ where: { id: existing.id }, data: { nomeCompleto, cpfEncrypted } });
       atualizados += 1;
       continue;
     }
     const sameName = await prisma.aluno.findMany({ where: { nomeCompleto, cpfHash: null, deletedAt: null }, select: { id: true }, take: 2 });
     if (sameName.length === 1) {
-      await prisma.aluno.update({ where: { id: sameName[0].id }, data: { cpfHash } });
+      await prisma.aluno.update({ where: { id: sameName[0].id }, data: { cpfHash, cpfEncrypted } });
       vinculados += 1;
     } else {
-      await prisma.aluno.create({ data: { nomeCompleto, cpfHash } });
+      await prisma.aluno.create({ data: { nomeCompleto, cpfHash, cpfEncrypted } });
       criados += 1;
     }
   }

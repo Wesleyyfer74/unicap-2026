@@ -1,9 +1,19 @@
 import { prisma } from '../config/prisma.js';
 import AppError from '../utils/AppError.js';
-import { hashCpf, isValidCpf } from '../utils/cpf.js';
+import { decryptCpf, encryptCpf, formatCpf, hashCpf, isValidCpf } from '../utils/cpf.js';
 
-const alunoSelect = { id: true, uuid: true, nomeCompleto: true, ativo: true, motivoInativacao: true, desativadoEm: true, deletedAt: true, createdAt: true, updatedAt: true };
+const alunoSelect = { id: true, uuid: true, cpfEncrypted: true, nomeCompleto: true, ativo: true, motivoInativacao: true, desativadoEm: true, deletedAt: true, createdAt: true, updatedAt: true };
 const pagination = (page, limit, total) => ({ page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) });
+const toAdminAluno = ({ cpfEncrypted, ...aluno }) => ({ ...aluno, cpf: formatCpf(decryptCpf(cpfEncrypted)) });
+
+async function cpfData(cpf, ignoredId) {
+  if (!cpf) return {};
+  if (!isValidCpf(cpf)) throw new AppError('Informe um CPF válido', 422);
+  const cpfHash = hashCpf(cpf);
+  const existing = await prisma.aluno.findFirst({ where: { cpfHash, ...(ignoredId && { id: { not: ignoredId } }) }, select: { id: true } });
+  if (existing) throw new AppError('CPF já cadastrado para outro aluno', 409);
+  return { cpfHash, cpfEncrypted: encryptCpf(cpf) };
+}
 
 export async function list({ page, limit, search, ativo }) {
   const where = { deletedAt: null, ...(search && { nomeCompleto: { contains: search } }), ...(ativo !== undefined && { ativo: ativo === 'true' }) };
@@ -11,7 +21,7 @@ export async function list({ page, limit, search, ativo }) {
     prisma.aluno.findMany({ where, select: alunoSelect, orderBy: { nomeCompleto: 'asc' }, skip: (page - 1) * limit, take: limit }),
     prisma.aluno.count({ where }),
   ]);
-  return { items, pagination: pagination(page, limit, total) };
+  return { items: items.map(toAdminAluno), pagination: pagination(page, limit, total) };
 }
 
 export async function listArchived({ page, limit, search }) {
@@ -20,17 +30,18 @@ export async function listArchived({ page, limit, search }) {
     prisma.aluno.findMany({ where, select: alunoSelect, orderBy: { deletedAt: 'desc' }, skip: (page - 1) * limit, take: limit }),
     prisma.aluno.count({ where }),
   ]);
-  return { items, pagination: pagination(page, limit, total) };
+  return { items: items.map(toAdminAluno), pagination: pagination(page, limit, total) };
 }
 
 export async function findById(id) {
   const aluno = await prisma.aluno.findFirst({ where: { id, deletedAt: null }, select: alunoSelect });
   if (!aluno) throw new AppError('Aluno não encontrado', 404);
-  return aluno;
+  return toAdminAluno(aluno);
 }
 
-export async function create(nomeCompleto) {
-  return prisma.aluno.create({ data: { nomeCompleto }, select: alunoSelect });
+export async function create({ nomeCompleto, cpf }) {
+  const aluno = await prisma.aluno.create({ data: { nomeCompleto, ...(await cpfData(cpf)) }, select: alunoSelect });
+  return toAdminAluno(aluno);
 }
 
 export async function findPublicByCpf(cpf) {
@@ -44,25 +55,28 @@ export async function findPublicByCpf(cpf) {
   return { uuid: aluno.uuid, nomeCompleto: aluno.nomeCompleto };
 }
 
-export async function update(id, nomeCompleto) {
+export async function update(id, { nomeCompleto, cpf }) {
   await findById(id);
-  return prisma.aluno.update({ where: { id }, data: { nomeCompleto }, select: alunoSelect });
+  const aluno = await prisma.aluno.update({ where: { id }, data: { nomeCompleto, ...(await cpfData(cpf, id)) }, select: alunoSelect });
+  return toAdminAluno(aluno);
 }
 
 export async function updateStatus(id, ativo, motivo) {
   await findById(id);
-  return prisma.aluno.update({
+  const aluno = await prisma.aluno.update({
     where: { id },
     data: ativo
       ? { ativo: true, motivoInativacao: null, desativadoEm: null }
       : { ativo: false, motivoInativacao: motivo, desativadoEm: new Date() },
     select: alunoSelect,
   });
+  return toAdminAluno(aluno);
 }
 
 export async function remove(id) {
   await findById(id);
-  return prisma.aluno.update({ where: { id }, data: { ativo: false, deletedAt: new Date() }, select: alunoSelect });
+  const aluno = await prisma.aluno.update({ where: { id }, data: { ativo: false, deletedAt: new Date() }, select: alunoSelect });
+  return toAdminAluno(aluno);
 }
 
 export async function listPresencas(id, { page, limit }) {

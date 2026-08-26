@@ -1,7 +1,11 @@
 import { z } from 'zod';
 
 const idSchema = z.object({ id: z.coerce.number().int().positive('ID inválido') }).strict();
-const alunoBody = z.object({ nomeCompleto: z.string().trim().min(2, 'Nome deve ter ao menos 2 caracteres').max(191, 'Nome muito longo') }).strict();
+const cpfOptional = z.string().trim().max(14).optional().or(z.literal(''));
+const alunoBody = z.object({
+  nomeCompleto: z.string().trim().min(2, 'Nome deve ter ao menos 2 caracteres').max(191, 'Nome muito longo'),
+  cpf: cpfOptional,
+}).strict();
 const paginationQuery = z.object({ page: z.coerce.number().int().positive().default(1), limit: z.coerce.number().int().min(1).max(50).default(10) }).strict();
 
 export const listAlunosSchema = z.object({ query: paginationQuery.extend({ search: z.string().trim().max(191).optional().default(''), ativo: z.enum(['true', 'false']).optional() }).strict() });
