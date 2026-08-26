@@ -162,7 +162,7 @@ export default function AlunosPage() {
             <span>Pesquisar</span>
             <input
               type="search"
-              placeholder="Nome do aluno"
+                placeholder="Nome ou CPF do aluno"
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
             />

@@ -1,10 +1,17 @@
 import { prisma } from '../config/prisma.js';
 import AppError from '../utils/AppError.js';
-import { decryptCpf, encryptCpf, formatCpf, hashCpf, isValidCpf } from '../utils/cpf.js';
+import { decryptCpf, encryptCpf, formatCpf, hashCpf, isValidCpf, normalizeCpf } from '../utils/cpf.js';
 
 const alunoSelect = { id: true, uuid: true, cpfEncrypted: true, nomeCompleto: true, ativo: true, motivoInativacao: true, desativadoEm: true, deletedAt: true, createdAt: true, updatedAt: true };
 const pagination = (page, limit, total) => ({ page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) });
 const toAdminAluno = ({ cpfEncrypted, ...aluno }) => ({ ...aluno, cpf: formatCpf(decryptCpf(cpfEncrypted)) });
+const searchWhere = (search) => {
+  if (!search) return {};
+  const normalizedCpf = normalizeCpf(search);
+  return normalizedCpf.length === 11 && isValidCpf(normalizedCpf)
+    ? { OR: [{ nomeCompleto: { contains: search } }, { cpfHash: hashCpf(normalizedCpf) }] }
+    : { nomeCompleto: { contains: search } };
+};
 
 async function cpfData(cpf, ignoredId) {
   if (!cpf) return {};
@@ -16,7 +23,7 @@ async function cpfData(cpf, ignoredId) {
 }
 
 export async function list({ page, limit, search, ativo }) {
-  const where = { deletedAt: null, ...(search && { nomeCompleto: { contains: search } }), ...(ativo !== undefined && { ativo: ativo === 'true' }) };
+  const where = { deletedAt: null, ...searchWhere(search), ...(ativo !== undefined && { ativo: ativo === 'true' }) };
   const [items, total] = await prisma.$transaction([
     prisma.aluno.findMany({ where, select: alunoSelect, orderBy: { nomeCompleto: 'asc' }, skip: (page - 1) * limit, take: limit }),
     prisma.aluno.count({ where }),
@@ -25,7 +32,7 @@ export async function list({ page, limit, search, ativo }) {
 }
 
 export async function listArchived({ page, limit, search }) {
-  const where = { deletedAt: { not: null }, ...(search && { nomeCompleto: { contains: search } }) };
+  const where = { deletedAt: { not: null }, ...searchWhere(search) };
   const [items, total] = await prisma.$transaction([
     prisma.aluno.findMany({ where, select: alunoSelect, orderBy: { deletedAt: 'desc' }, skip: (page - 1) * limit, take: limit }),
     prisma.aluno.count({ where }),
