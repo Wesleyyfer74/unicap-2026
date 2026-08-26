@@ -30,5 +30,6 @@ export async function getSummary() {
     ultimasChamadas,
     ultimasOcorrencias,
     period: { ocorrenciasRecentesDias: 7 },
+    generatedAt: new Date().toISOString(),
   };
 }

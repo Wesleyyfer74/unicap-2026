@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { dashboardService } from "../../services/dashboard.service";
@@ -19,17 +19,31 @@ export default function DashboardPage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [helpOpen, setHelpOpen] = useState(false);
-  useEffect(() => {
-    dashboardService
-      .getSummary()
-      .then(setData)
-      .catch((requestError) =>
-        setError(
-          requestError.response?.data?.message ||
-            "Não foi possível carregar o dashboard.",
-        ),
+
+  const loadDashboard = useCallback(async () => {
+    try {
+      const summary = await dashboardService.getSummary();
+      setData(summary);
+      setError("");
+    } catch (requestError) {
+      setError(
+        requestError.response?.data?.message ||
+          "Não foi possível carregar o dashboard.",
       );
+    }
   }, []);
+
+  useEffect(() => {
+    loadDashboard();
+    const refreshInterval = window.setInterval(loadDashboard, 30000);
+    const refreshOnFocus = () => loadDashboard();
+    window.addEventListener("focus", refreshOnFocus);
+
+    return () => {
+      window.clearInterval(refreshInterval);
+      window.removeEventListener("focus", refreshOnFocus);
+    };
+  }, [loadDashboard]);
 
   if (error)
     return (
@@ -91,6 +105,13 @@ export default function DashboardPage() {
           <span>Visão geral</span>
           <h1>Olá, {administrador.nome}</h1>
           <p>Acompanhe rapidamente a operação do transporte.</p>
+          <small className="dashboard-updated-at">
+            Dados atualizados às {new Intl.DateTimeFormat("pt-BR", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            }).format(new Date(data.generatedAt))}
+          </small>
         </div>
         <div className="dashboard-heading-actions">
           <button

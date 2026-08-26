@@ -179,6 +179,7 @@ th { color: #4a586c; font-size: .85rem; text-transform: uppercase; letter-spacin
 .dashboard-heading span { color: #1769aa; font-weight: 750; text-transform: uppercase; font-size: .78rem; letter-spacing: .08em; }
 .dashboard-heading h1 { margin: .2rem 0; font-size: clamp(1.7rem, 4vw, 2.35rem); }
 .dashboard-heading p { margin: 0; color: #667387; }
+.dashboard-heading .dashboard-updated-at { display: block; margin-top: .35rem; color: #738094; font-size: .76rem; }
 .metric-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .8rem; }
 .metric-card { position: relative; display: grid; gap: .4rem; min-height: 8.2rem; padding: 1rem; overflow: hidden; border: 1px solid #e0e7ef; border-radius: .8rem; background: white; color: #172033; text-decoration: none; box-shadow: 0 .35rem 1.2rem rgb(18 58 99 / 7%); }
 .metric-card::before { content: ''; position: absolute; inset: 0 auto 0 0; width: .3rem; background: var(--accent); }
