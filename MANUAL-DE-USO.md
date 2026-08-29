@@ -37,7 +37,7 @@ Após o acesso, o sistema abre o Dashboard. Ao terminar, utilize **Sair**, princ
 
 ### Acesso do fiscal
 
-1. Na tela de entrada, selecione **Fiscal**.
+1. Acesse a página exclusiva **/fiscal/login**.
 2. Escolha seu nome na lista de fiscais ativos.
 3. Informe a senha operacional fornecida pela administração.
 4. Toque em **Entrar como fiscal**.

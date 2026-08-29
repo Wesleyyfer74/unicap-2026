@@ -40,6 +40,10 @@ button, input, select, textarea { font: inherit; }
 .login-type { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; margin: 1rem 0; padding: .3rem; border-radius: .7rem; background: #e9eef5; }
 .login-type button { min-height: 44px; border: 0; border-radius: .5rem; background: transparent; color: #526075; font-weight: 800; cursor: pointer; }
 .login-type button.active { background: white; color: var(--unicap-navy); box-shadow: 0 .2rem .6rem rgb(7 31 69 / 12%); }
+.login-profile-label { display: inline-block; margin-top: 1rem; color: var(--unicap-red); font-size: .78rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.fiscal-login-page { background: linear-gradient(145deg, #e8f0fb, #f7f9fc); }
+.login-alternate-link { display: block; margin-top: 1.15rem; color: var(--unicap-blue); font-weight: 750; text-align: center; text-decoration: none; }
+.login-alternate-link:hover, .login-alternate-link:focus-visible { color: var(--unicap-red); text-decoration: underline; }
 .login-card input:focus { border-color: #1769aa; box-shadow: 0 0 0 3px rgb(23 105 170 / 15%); }
 .button { border: 0; border-radius: .55rem; padding: .75rem 1rem; cursor: pointer; font-weight: 700; }
 .button:disabled { cursor: wait; opacity: .65; }
