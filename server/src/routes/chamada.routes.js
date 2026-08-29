@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as chamadaController from '../controllers/chamada.controller.js';
-import { authenticate } from '../middlewares/auth.middleware.js';
+import { authenticate, authorizeChamadaAccess } from '../middlewares/auth.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import { chamadaDetailsSchema, chamadaIdSchema, createChamadaSchema, createPresencaSchema, listChamadasSchema, listPresencasChamadaSchema, removePresencaSchema, scannerAlunoSchema, searchAlunosChamadaSchema } from '../validators/chamada.validator.js';
 import { createViagemSchema, updateViagemSchema, viagemIdSchema } from '../validators/viagem.validator.js';
@@ -10,6 +10,7 @@ import * as ocorrenciaController from '../controllers/ocorrencia.controller.js';
 
 const router = Router();
 router.use(authenticate);
+router.param('id', authorizeChamadaAccess);
 router.get('/', validate(listChamadasSchema), chamadaController.list);
 router.post('/', validate(createChamadaSchema), chamadaController.create);
 router.get('/:id/detalhes', validate(chamadaDetailsSchema), chamadaController.findDetails);

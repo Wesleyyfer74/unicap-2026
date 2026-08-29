@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { prisma } from '../config/prisma.js';
 import { env } from '../config/env.js';
 import AppError from '../utils/AppError.js';
@@ -26,7 +27,31 @@ export async function login(email, password) {
     },
   );
   const { passwordHash: _passwordHash, tokenVersion: _tokenVersion, ...adminSeguro } = administrador;
-  return { token, administrador: adminSeguro };
+  return { token, administrador: { ...adminSeguro, role: 'ADMIN' }, usuario: { ...adminSeguro, role: 'ADMIN' } };
+}
+
+export async function listLoginFiscais() {
+  return prisma.fiscal.findMany({
+    where: { ativo: true, deletedAt: null },
+    select: { id: true, nome: true },
+    orderBy: { nome: 'asc' },
+  });
+}
+
+export async function fiscalLogin(fiscalId, password) {
+  const fiscal = await prisma.fiscal.findFirst({
+    where: { id: fiscalId, ativo: true, deletedAt: null },
+    select: { id: true, nome: true },
+  });
+  const supplied = createHash('sha256').update(password).digest();
+  const expected = createHash('sha256').update(env.FISCAL_PASSWORD).digest();
+  if (!fiscal || !timingSafeEqual(supplied, expected)) throw new AppError('Fiscal ou senha inválidos', 401);
+
+  const token = jwt.sign({ type: 'fiscal' }, env.JWT_SECRET, {
+    subject: String(fiscal.id), expiresIn: env.JWT_EXPIRES_IN, algorithm: 'HS256',
+    issuer: env.JWT_ISSUER, audience: env.JWT_AUDIENCE,
+  });
+  return { token, usuario: { ...fiscal, fiscalId: fiscal.id, role: 'FISCAL' } };
 }
 
 export async function getSession(administradorId) {

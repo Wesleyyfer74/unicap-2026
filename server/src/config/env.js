@@ -6,6 +6,7 @@ const schema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL é obrigatória'),
   JWT_SECRET: z.string().min(32, 'JWT_SECRET deve ter ao menos 32 caracteres'),
   CPF_HASH_SECRET: z.string().min(32, 'CPF_HASH_SECRET deve ter ao menos 32 caracteres').optional(),
+  FISCAL_PASSWORD: z.string().min(8, 'FISCAL_PASSWORD deve ter ao menos 8 caracteres'),
   JWT_EXPIRES_IN: z.string().regex(/^\d+[smhd]$/, 'JWT_EXPIRES_IN deve usar formato como 30m ou 8h').default('8h'),
   JWT_ISSUER: z.string().min(1).default('sistema-transporte-api'),
   JWT_AUDIENCE: z.string().min(1).default('sistema-transporte-admin'),

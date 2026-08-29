@@ -4,6 +4,7 @@ import AlunoHistoryModal from "../../components/AlunoHistoryModal";
 import AlunoQrModal from "../../components/AlunoQrModal";
 import Modal from "../../components/Modal";
 import { alunoService } from "../../services/aluno.service";
+import { useAuth } from "../../hooks/useAuth";
 
 const initialPagination = { page: 1, limit: 10, total: 0, totalPages: 1 };
 const formatSearchValue = (value) => {
@@ -16,6 +17,8 @@ const formatSearchValue = (value) => {
 };
 
 export default function AlunosPage() {
+  const { administrador } = useAuth();
+  const isAdmin = administrador.role === "ADMIN";
   const [alunos, setAlunos] = useState([]);
   const [pagination, setPagination] = useState(initialPagination);
   const [searchInput, setSearchInput] = useState("");
@@ -149,12 +152,12 @@ export default function AlunosPage() {
           <h1>Alunos</h1>
           <p>Gerencie cadastros, QR Codes e históricos.</p>
         </div>
-        <button
+        {isAdmin && <button
           className="button button-primary"
           onClick={() => setEditing(null)}
         >
           Novo Aluno
-        </button>
+        </button>}
       </div>
       {feedback && (
         <div className={`feedback ${feedback.type}`} role="alert">
@@ -244,12 +247,12 @@ export default function AlunosPage() {
                       )}
                     </td>
                     <td data-label="Ações" className="actions">
-                      <button
+                      {isAdmin && <button
                         className="text-button"
                         onClick={() => setEditing(aluno)}
                       >
                         Editar
-                      </button>
+                      </button>}
                       <button
                         className="text-button"
                         onClick={() => setHistoryAluno(aluno)}
@@ -262,13 +265,13 @@ export default function AlunosPage() {
                       >
                         QR Code
                       </button>
-                      <button
+                      {isAdmin && <button
                         className="text-button danger"
                         onClick={() => setConfirmingDelete(aluno)}
                       >
                         Excluir
-                      </button>
-                      {aluno.ativo ? (
+                      </button>}
+                      {isAdmin && (aluno.ativo ? (
                         <button
                           className="text-button danger"
                           onClick={() => {
@@ -286,7 +289,7 @@ export default function AlunosPage() {
                         >
                           Ativar
                         </button>
-                      )}
+                      ))}
                     </td>
                   </tr>
                 ))

@@ -3,10 +3,12 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { chamadaService } from '../../services/chamada.service';
 import { fiscalService } from '../../services/fiscal.service';
 import { TRANSPORT_LINES } from '../../utils/transportLines';
+import { useAuth } from '../../hooks/useAuth';
 
 const emptyForm = { nomeMotorista: '', fiscalId: '', linhaRota: '', turno: '', horarioSaida: '', horarioChegada: '', hodometroSaida: '', hodometroChegada: '' };
 
 export default function ViagemFormPage() {
+  const { administrador } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const [chamada, setChamada] = useState(null);
@@ -17,7 +19,10 @@ export default function ViagemFormPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    Promise.all([chamadaService.get(id), fiscalService.list({ page: 1, limit: 100 }), chamadaService.getTrip(id)])
+    const fiscalPromise = administrador.role === 'FISCAL'
+      ? Promise.resolve({ items: [{ id: administrador.fiscalId, nome: administrador.nome }] })
+      : fiscalService.list({ page: 1, limit: 100 });
+    Promise.all([chamadaService.get(id), fiscalPromise, chamadaService.getTrip(id)])
       .then(([call, fiscalData, existingTrip]) => {
         setChamada(call);
         setFiscais(fiscalData.items);
@@ -35,7 +40,7 @@ export default function ViagemFormPage() {
         } : { ...emptyForm, fiscalId: String(call.fiscalId), turno: call.turno });
       })
       .catch((requestError) => setError(requestError.response?.data?.message || 'Não foi possível carregar o formulário.'));
-  }, [id]);
+  }, [id, administrador]);
 
   function set(field, value) { setForm((old) => ({ ...old, [field]: value })); }
 
@@ -60,7 +65,7 @@ export default function ViagemFormPage() {
     {error && <div className="feedback error">{error}</div>}
     <form className="card trip-form" onSubmit={submit}>
       <label><span>Nome do Motorista *</span><input value={form.nomeMotorista} maxLength="191" required onChange={(event) => set('nomeMotorista', event.target.value)} /></label>
-      <label><span>Fiscal *</span><select value={form.fiscalId} required onChange={(event) => set('fiscalId', event.target.value)}>{fiscais.map((fiscal) => <option key={fiscal.id} value={fiscal.id}>{fiscal.nome}</option>)}</select></label>
+      <label><span>Fiscal *</span><select value={form.fiscalId} required disabled={administrador.role === 'FISCAL'} onChange={(event) => set('fiscalId', event.target.value)}>{fiscais.map((fiscal) => <option key={fiscal.id} value={fiscal.id}>{fiscal.nome}</option>)}</select></label>
       <label><span>Linha / Rota</span><select value={form.linhaRota} onChange={(event) => set('linhaRota', event.target.value)}><option value="">Não informado</option>{TRANSPORT_LINES.map((line) => <option key={line} value={line}>{line}</option>)}</select></label>
       <label><span>Turno</span><select value={form.turno} onChange={(event) => set('turno', event.target.value)}><option value="">Não informado</option><option value="MATUTINO">Matutino</option><option value="INTEGRAL">Integral</option><option value="NOTURNO">Noturno</option></select></label>
       <label><span>Horário de Saída</span><input type="time" value={form.horarioSaida} onChange={(event) => set('horarioSaida', event.target.value)} /></label>

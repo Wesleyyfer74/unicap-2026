@@ -35,6 +35,15 @@ Se o CPF não for localizado, confira os onze números e procure a administraç�
 
 Após o acesso, o sistema abre o Dashboard. Ao terminar, utilize **Sair**, principalmente em celulares, tablets ou computadores compartilhados.
 
+### Acesso do fiscal
+
+1. Na tela de entrada, selecione **Fiscal**.
+2. Escolha seu nome na lista de fiscais ativos.
+3. Informe a senha operacional fornecida pela administração.
+4. Toque em **Entrar como fiscal**.
+
+O fiscal possui acesso somente à consulta de alunos, chamadas e ocorrências. Ele pode abrir e operar chamadas vinculadas ao próprio nome. Dashboard administrativo, gestão de fiscais, histórico geral, relatórios, alterações de alunos e configurações da conta ficam restritos ao administrador.
+
 ### Alteração de conta e senha
 
 1. Toque na engrenagem localizada no cabeçalho.

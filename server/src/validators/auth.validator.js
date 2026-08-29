@@ -12,6 +12,13 @@ export const loginSchema = z.object({
   }).strict(),
 });
 
+export const fiscalLoginSchema = z.object({
+  body: z.object({
+    fiscalId: z.coerce.number().int().positive('Selecione um fiscal'),
+    password: bcryptPassword('Senha'),
+  }).strict(),
+});
+
 export const changePasswordSchema = z.object({
   body: z.object({
     currentPassword: bcryptPassword('Senha atual'),

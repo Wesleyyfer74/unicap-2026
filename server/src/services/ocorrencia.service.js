@@ -17,8 +17,9 @@ export async function create(chamadaId, alunoId, observacao) {
   return prisma.ocorrencia.create({ data: { chamadaId, alunoId, fiscalId: chamada.fiscalId, observacao }, select: detailSelect });
 }
 
-export async function list({ page, limit, aluno, alunoId, fiscal, dataInicio, dataFim, turno, chamadaId }) {
+export async function list({ page, limit, aluno, alunoId, fiscal, dataInicio, dataFim, turno, chamadaId }, actor) {
   const where = {
+    ...(actor?.role === 'FISCAL' && { fiscalId: actor.fiscalId }),
     ...(chamadaId && { chamadaId }),
     ...(alunoId ? { alunoId } : aluno && { aluno: { nomeCompleto: { contains: aluno } } }),
     ...(fiscal && { fiscal: { nome: { contains: fiscal } } }),
@@ -47,13 +48,14 @@ export async function list({ page, limit, aluno, alunoId, fiscal, dataInicio, da
   return { items, pagination: { page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) } };
 }
 
-export async function findById(id) {
+export async function findById(id, actor) {
   const ocorrencia = await prisma.ocorrencia.findUnique({ where: { id }, select: detailSelect });
   if (!ocorrencia) throw new AppError('Ocorrência não encontrada', 404);
+  if (actor?.role === 'FISCAL' && ocorrencia.fiscal.id !== actor.fiscalId) throw new AppError('Este fiscal não possui acesso a esta ocorrência', 403);
   return ocorrencia;
 }
 
-export async function update(id, observacao) {
-  await findById(id);
+export async function update(id, observacao, actor) {
+  await findById(id, actor);
   return prisma.ocorrencia.update({ where: { id }, data: { observacao }, select: detailSelect });
 }

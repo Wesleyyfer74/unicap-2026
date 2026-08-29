@@ -36,7 +36,10 @@ button, input, select, textarea { font: inherit; }
 .login-card p { margin: 0 0 1.5rem; color: #5c6879; }
 .login-card form { display: grid; gap: .65rem; }
 .login-card label { margin-top: .35rem; font-weight: 650; }
-.login-card input { width: 100%; border: 1px solid #bec9d6; border-radius: .55rem; padding: .8rem; outline: none; }
+.login-card input, .login-card select { width: 100%; min-height: 48px; border: 1px solid #bec9d6; border-radius: .55rem; padding: .8rem; outline: none; }
+.login-type { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; margin: 1rem 0; padding: .3rem; border-radius: .7rem; background: #e9eef5; }
+.login-type button { min-height: 44px; border: 0; border-radius: .5rem; background: transparent; color: #526075; font-weight: 800; cursor: pointer; }
+.login-type button.active { background: white; color: var(--unicap-navy); box-shadow: 0 .2rem .6rem rgb(7 31 69 / 12%); }
 .login-card input:focus { border-color: #1769aa; box-shadow: 0 0 0 3px rgb(23 105 170 / 15%); }
 .button { border: 0; border-radius: .55rem; padding: .75rem 1rem; cursor: pointer; font-weight: 700; }
 .button:disabled { cursor: wait; opacity: .65; }

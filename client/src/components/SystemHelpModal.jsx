@@ -17,6 +17,8 @@ const sections = [
     audience: 'Administrador e equipe autorizada',
     steps: [
       'Acesse /admin/login, informe o e-mail e a senha e toque em “Entrar”.',
+      'Para acesso operacional, selecione “Fiscal”, escolha seu nome e informe a senha fornecida pela administração.',
+      'O fiscal visualiza somente Alunos, Chamadas e Ocorrências; as demais áreas permanecem restritas ao administrador.',
       'Use a engrenagem no cabeçalho para alterar o e-mail ou a senha da conta.',
       'Ao terminar o trabalho, utilize “Sair”, principalmente em aparelhos compartilhados.',
     ],

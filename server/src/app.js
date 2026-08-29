@@ -56,6 +56,7 @@ if (env.NODE_ENV !== 'test') {
   app.use(morgan(':remote-addr :method :safe-path :status :response-time ms'));
 }
 app.use('/api/auth/login', loginLimiter);
+app.use('/api/auth/fiscal/login', loginLimiter);
 app.use('/api/public/alunos', publicRegistrationLimiter);
 app.use('/api/public', publicRoutes);
 app.use('/api/auth', authRoutes);

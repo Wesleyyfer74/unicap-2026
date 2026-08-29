@@ -1,6 +1,6 @@
 import * as viagemService from '../services/viagem.service.js';
 export async function create(request, response, next) {
-  try { return response.status(201).json({ viagem: await viagemService.create(request.validated.params.id, request.validated.body) }); }
+  try { const body = request.auth.role === 'FISCAL' ? { ...request.validated.body, fiscalId: request.auth.fiscalId } : request.validated.body; return response.status(201).json({ viagem: await viagemService.create(request.validated.params.id, body) }); }
   catch (error) { return next(error); }
 }
 export async function findByCall(request, response, next) {
@@ -8,6 +8,6 @@ export async function findByCall(request, response, next) {
   catch (error) { return next(error); }
 }
 export async function update(request, response, next) {
-  try { return response.json({ viagem: await viagemService.update(request.validated.params.id, request.validated.body) }); }
+  try { const body = request.auth.role === 'FISCAL' ? { ...request.validated.body, fiscalId: request.auth.fiscalId } : request.validated.body; return response.json({ viagem: await viagemService.update(request.validated.params.id, body) }); }
   catch (error) { return next(error); }
 }

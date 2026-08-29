@@ -173,6 +173,7 @@ FRONTEND_URL="https://seudominio.com"
 ADMIN_NAME="Administrador"
 ADMIN_EMAIL="admin@seudominio.com"
 ADMIN_PASSWORD="SENHA_INICIAL_FORTE"
+FISCAL_PASSWORD="SENHA_COMPARTILHADA_DOS_FISCAIS"
 ```
 
 A Hostinger pode fornecer `PORT` automaticamente; o backend sempre utiliza `process.env.PORT`. `FRONTEND_URL` deve conter somente a origem pública autorizada, sem caminho adicional. `CPF_HASH_SECRET` não pode ser alterada depois da importação dos alunos, pois ela protege a consulta dos CPFs.

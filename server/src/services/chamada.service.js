@@ -15,9 +15,9 @@ const detailSelect = {
 };
 const pagination = (page, limit, total) => ({ page, limit, total, totalPages: Math.max(1, Math.ceil(total / limit)) });
 
-export async function list({ page, limit, fiscalId, turno, status, data }) {
+export async function list({ page, limit, fiscalId, turno, status, data }, actor) {
   const where = {
-    ...(fiscalId && { fiscalId }), ...(turno && { turno }), ...(status && { status }),
+    ...(actor?.role === 'FISCAL' ? { fiscalId: actor.fiscalId } : fiscalId && { fiscalId }), ...(turno && { turno }), ...(status && { status }),
     ...(data && { data: new Date(`${data}T00:00:00.000Z`) }),
   };
   const [items, total] = await prisma.$transaction([

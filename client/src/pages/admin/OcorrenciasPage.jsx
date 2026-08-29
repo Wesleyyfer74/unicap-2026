@@ -3,12 +3,15 @@ import OcorrenciaDetailsModal from '../../components/OcorrenciaDetailsModal';
 import OcorrenciaFormModal from '../../components/OcorrenciaFormModal';
 import { alunoService } from '../../services/aluno.service';
 import { ocorrenciaService } from '../../services/ocorrencia.service';
+import { useAuth } from '../../hooks/useAuth';
 
 const initialPagination = { page: 1, limit: 10, total: 0, totalPages: 1 };
 const emptyFilters = { aluno: '', alunoId: '', fiscal: '', dataInicio: '', dataFim: '', turno: '' };
 const shiftLabels = { MATUTINO: 'Matutino', INTEGRAL: 'Integral', NOTURNO: 'Noturno' };
 
 export default function OcorrenciasPage() {
+  const { administrador } = useAuth();
+  const isAdmin = administrador.role === 'ADMIN';
   const [items, setItems] = useState([]);
   const [pagination, setPagination] = useState(initialPagination);
   const [filterInput, setFilterInput] = useState(emptyFilters);
@@ -79,10 +82,10 @@ export default function OcorrenciasPage() {
         <label><span>Turno</span><select value={filterInput.turno} onChange={(event) => setFilter('turno', event.target.value)}><option value="">Todos</option><option value="MATUTINO">Matutino</option><option value="INTEGRAL">Integral</option><option value="NOTURNO">Noturno</option></select></label>
       </div>
       {filterInput.alunoId && <div className="occurrence-student-summary" aria-live="polite"><div><span>Aluno</span><strong>{filterInput.aluno}</strong></div><div><span>Total de ocorrências</span><strong>{loading ? '—' : pagination.total}</strong></div></div>}
-      <div className="table-wrapper"><table><thead><tr><th>Aluno</th><th>Data</th><th>Fiscal</th><th>Chamada</th><th>Observação</th><th>Ações</th></tr></thead><tbody>{loading ? <tr><td colSpan="6" className="empty-state">Carregando...</td></tr> : items.length === 0 ? <tr><td colSpan="6" className="empty-state">Nenhuma ocorrência encontrada.</td></tr> : items.map((item) => <tr key={item.id}><td data-label="Aluno">{item.aluno.nomeCompleto}</td><td data-label="Data">{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(item.chamada.data))}</td><td data-label="Fiscal">{item.fiscal.nome}</td><td data-label="Chamada">#{item.chamada.id} · {shiftLabels[item.chamada.turno]}</td><td data-label="Observação"><span className={filterInput.alunoId ? 'occurrence-note-full' : 'truncate-note'}>{item.observacao}</span></td><td data-label="Ações"><button className="text-button" onClick={() => setSelected(item)}>Detalhes</button><button className="text-button" onClick={() => setEditing(item)}>Editar</button></td></tr>)}</tbody></table></div>
+      <div className="table-wrapper"><table><thead><tr><th>Aluno</th><th>Data</th><th>Fiscal</th><th>Chamada</th><th>Observação</th><th>Ações</th></tr></thead><tbody>{loading ? <tr><td colSpan="6" className="empty-state">Carregando...</td></tr> : items.length === 0 ? <tr><td colSpan="6" className="empty-state">Nenhuma ocorrência encontrada.</td></tr> : items.map((item) => <tr key={item.id}><td data-label="Aluno">{item.aluno.nomeCompleto}</td><td data-label="Data">{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(item.chamada.data))}</td><td data-label="Fiscal">{item.fiscal.nome}</td><td data-label="Chamada">#{item.chamada.id} · {shiftLabels[item.chamada.turno]}</td><td data-label="Observação"><span className={filterInput.alunoId ? 'occurrence-note-full' : 'truncate-note'}>{item.observacao}</span></td><td data-label="Ações"><button className="text-button" onClick={() => setSelected(item)}>Detalhes</button>{isAdmin && <button className="text-button" onClick={() => setEditing(item)}>Editar</button>}</td></tr>)}</tbody></table></div>
       <div className="pagination"><span>{pagination.total} registro(s)</span><div><button className="button button-secondary" disabled={pagination.page <= 1 || loading} onClick={() => setPagination((old) => ({ ...old, page: old.page - 1 }))}>Anterior</button><span>{pagination.page}/{pagination.totalPages}</span><button className="button button-secondary" disabled={pagination.page >= pagination.totalPages || loading} onClick={() => setPagination((old) => ({ ...old, page: old.page + 1 }))}>Próxima</button></div></div>
     </section>
-    {selected && <OcorrenciaDetailsModal ocorrencia={selected} onClose={() => setSelected(null)} onEdit={startEdit} />}
+    {selected && <OcorrenciaDetailsModal ocorrencia={selected} onClose={() => setSelected(null)} onEdit={isAdmin ? startEdit : undefined} />}
     {editing && <OcorrenciaFormModal ocorrencia={editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); setFeedback({ type: 'success', text: 'Ocorrência atualizada com sucesso.' }); load(); }} />}
   </main>;
 }

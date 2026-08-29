@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
     window.addEventListener('auth:unauthorized', logout);
     return () => window.removeEventListener('auth:unauthorized', logout);
   }, [logout]);
-  const login = useCallback(async (credentials) => { const session = await authService.login(credentials); authStorage.setToken(session.token); setAdministrador(session.administrador); return session.administrador; }, []);
+  const login = useCallback(async (credentials) => { const session = credentials.type === 'FISCAL' ? await authService.fiscalLogin({ fiscalId: credentials.fiscalId, password: credentials.password }) : await authService.login({ email: credentials.email, password: credentials.password }); const usuario = session.usuario || session.administrador; authStorage.setToken(session.token); setAdministrador(usuario); return usuario; }, []);
   const updateAdministrador = useCallback((data) => setAdministrador(data), []);
   const value = useMemo(() => ({ administrador, authenticated: Boolean(administrador), loading, login, logout, updateAdministrador }), [administrador, loading, login, logout, updateAdministrador]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

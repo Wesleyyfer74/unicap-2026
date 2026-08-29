@@ -1,5 +1,15 @@
 import Modal from './Modal';
 
 export default function OcorrenciaDetailsModal({ ocorrencia, onClose, onEdit }) {
-  return <Modal title="Detalhes da ocorrência" onClose={onClose}><div className="occurrence-details"><div><span>Aluno</span><strong>{ocorrencia.aluno.nomeCompleto}</strong></div><div><span>Fiscal</span><strong>{ocorrencia.fiscal.nome}</strong></div><div><span>Chamada</span><strong>#{ocorrencia.chamada.id} · {ocorrencia.chamada.turno}</strong></div><div><span>Data da chamada</span><strong>{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(ocorrencia.chamada.data))}</strong></div><div><span>Registrada em</span><strong>{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(ocorrencia.createdAt))}</strong></div><div className="full"><span>Observação</span><p>{ocorrencia.observacao}</p></div></div><footer className="modal-actions"><button className="button button-secondary" onClick={onClose}>Fechar</button><button className="button button-primary" onClick={onEdit}>Editar</button></footer></Modal>;
+  return <Modal title="Detalhes da ocorrência" onClose={onClose}>
+    <div className="occurrence-details">
+      <div><span>Aluno</span><strong>{ocorrencia.aluno.nomeCompleto}</strong></div>
+      <div><span>Fiscal</span><strong>{ocorrencia.fiscal.nome}</strong></div>
+      <div><span>Chamada</span><strong>#{ocorrencia.chamada.id} · {ocorrencia.chamada.turno}</strong></div>
+      <div><span>Data da chamada</span><strong>{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(ocorrencia.chamada.data))}</strong></div>
+      <div><span>Registrada em</span><strong>{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(ocorrencia.createdAt))}</strong></div>
+      <div className="full"><span>Observação</span><p>{ocorrencia.observacao}</p></div>
+    </div>
+    <footer className="modal-actions"><button className="button button-secondary" onClick={onClose}>Fechar</button>{onEdit && <button className="button button-primary" onClick={onEdit}>Editar</button>}</footer>
+  </Modal>;
 }
