@@ -3,6 +3,7 @@ import { BrowserQRCodeReader } from "@zxing/browser";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Modal from "../../components/Modal";
 import ChamadaPresencasModal from "../../components/ChamadaPresencasModal";
+import AlunoNameSearchModal from "../../components/AlunoNameSearchModal";
 import { chamadaService } from "../../services/chamada.service";
 
 const labels = {
@@ -38,6 +39,7 @@ export default function ChamadaScannerPage() {
   const [confirmingFinish, setConfirmingFinish] = useState(false);
   const [recentPresences, setRecentPresences] = useState([]);
   const [showAll, setShowAll] = useState(false);
+  const [showNameSearch, setShowNameSearch] = useState(false);
   const [askTrip, setAskTrip] = useState(false);
 
   const releaseReadLock = useCallback(() => {
@@ -212,6 +214,30 @@ export default function ChamadaScannerPage() {
     releaseReadLock();
   }
 
+  function openNameSearch() {
+    readingLockRef.current = true;
+    setFeedback(null);
+    setShowNameSearch(true);
+    setCameraMessage("Busca por nome aberta.");
+  }
+
+  function closeNameSearch() {
+    setShowNameSearch(false);
+    setCameraMessage("Aponte a câmera para o próximo QR Code.");
+    releaseReadLock();
+  }
+
+  function selectStudentByName(selectedAluno) {
+    setShowNameSearch(false);
+    if (!selectedAluno.ativo) {
+      setBlockedAluno(selectedAluno);
+      setCameraMessage("Aluno não autorizado. Feche o aviso para continuar.");
+      return;
+    }
+    setAluno(selectedAluno);
+    setCameraMessage("Aluno encontrado pelo nome. Confirme a presença.");
+  }
+
   function handleRemoved(presenceId) {
     setRecentPresences((old) =>
       old.filter((presence) => presence.id !== presenceId),
@@ -322,6 +348,13 @@ export default function ChamadaScannerPage() {
             </button>
           )}
           <button
+            className="button button-secondary manual-presence-button"
+            disabled={chamada.status !== "ABERTA"}
+            onClick={openNameSearch}
+          >
+            Buscar aluno pelo nome
+          </button>
+          <button
             className="button button-danger finish-call-button"
             disabled={chamada.status !== "ABERTA"}
             onClick={() => setConfirmingFinish(true)}
@@ -367,6 +400,13 @@ export default function ChamadaScannerPage() {
           chamada={chamada}
           onClose={() => setShowAll(false)}
           onRemoved={handleRemoved}
+        />
+      )}
+      {showNameSearch && (
+        <AlunoNameSearchModal
+          chamadaId={id}
+          onClose={closeNameSearch}
+          onSelect={selectStudentByName}
         />
       )}
       {blockedAluno && (

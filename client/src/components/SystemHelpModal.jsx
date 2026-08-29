@@ -50,6 +50,7 @@ const sections = [
       'Selecione o fiscal responsável, o turno e a cor do ônibus; a data e o início são registrados pelo servidor.',
       'Na tela do scanner, permita o uso da câmera e prefira a câmera traseira do celular.',
       'Aponte para o QR Code, confira o nome identificado e toque em “Confirmar”.',
+      'Se o aluno estiver sem o QR Code, toque em “Buscar aluno pelo nome”, digite pelo menos duas letras, selecione o cadastro correto e confirme a presença.',
       'Após a mensagem de presença registrada, continue com o próximo aluno sem recarregar a página.',
       'QR inválido, aluno inexistente, duplicado ou inativo não gera presença. Para aluno inativo, confira o motivo exibido.',
       'Acompanhe o total e os últimos alunos registrados. Em “Ver todos”, pesquise e remova enganos enquanto a chamada estiver aberta.',

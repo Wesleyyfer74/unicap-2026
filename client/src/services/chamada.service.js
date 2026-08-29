@@ -7,6 +7,7 @@ export const chamadaService = {
   finish: (id) => api.patch(`/chamadas/${id}/finalizar`).then(({ data }) => data.chamada),
   addPresence: (id, uuid) => api.post(`/chamadas/${id}/presencas`, { uuid }).then(({ data }) => data),
   identifyStudent: (id, uuid) => api.get(`/chamadas/${id}/scanner/alunos/${encodeURIComponent(uuid)}`).then(({ data }) => data.aluno),
+  searchStudents: (id, params) => api.get(`/chamadas/${id}/scanner/alunos`, { params }).then(({ data }) => data.items),
   listPresences: (id, params) => api.get(`/chamadas/${id}/presencas`, { params }).then(({ data }) => data),
   removePresence: (id, presenceId) => api.delete(`/chamadas/${id}/presencas/${presenceId}`),
   createTrip: (id, data) => api.post(`/chamadas/${id}/viagem`, data).then(({ data: response }) => response.viagem),

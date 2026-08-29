@@ -112,6 +112,18 @@ A data e o horário de início são definidos pelo servidor. A chamada é criada
 
 O scanner bloqueia leituras simultâneas enquanto confirma o aluno. Depois do registro ou cancelamento, ele é reativado para o próximo passageiro.
 
+### Registrar aluno sem QR Code
+
+Quando o aluno não estiver com o QR Code:
+
+1. Toque em **Buscar aluno pelo nome** na tela do scanner.
+2. Digite pelo menos duas letras do nome.
+3. Selecione o aluno correto na lista apresentada.
+4. Confira novamente o nome no modal de confirmação.
+5. Toque em **Confirmar** para registrar a presença.
+
+Alunos já registrados aparecem bloqueados na pesquisa. Se o aluno estiver inativo, o sistema não registra a presença e apresenta o motivo da desativação. A chamada precisa continuar aberta para utilizar essa opção.
+
 ### Mensagens possíveis
 
 - **Presença registrada:** operação concluída.

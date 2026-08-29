@@ -106,6 +106,26 @@ export async function identifyStudent(chamadaId, uuid) {
   return aluno;
 }
 
+export async function searchStudents(chamadaId, { search, limit }) {
+  const chamada = await prisma.chamada.findUnique({ where: { id: chamadaId }, select: { id: true, status: true } });
+  if (!chamada) throw new AppError('Chamada não encontrada', 404);
+  if (chamada.status !== 'ABERTA') throw new AppError('Chamadas finalizadas não podem receber novas presenças', 409);
+
+  const alunos = await prisma.aluno.findMany({
+    where: { deletedAt: null, nomeCompleto: { contains: search } },
+    select: {
+      id: true, uuid: true, nomeCompleto: true, ativo: true, motivoInativacao: true,
+      presencas: { where: { chamadaId }, select: { id: true }, take: 1 },
+    },
+    orderBy: { nomeCompleto: 'asc' },
+    take: limit,
+  });
+
+  return {
+    items: alunos.map(({ presencas, ...aluno }) => ({ ...aluno, jaRegistrado: presencas.length > 0 })),
+  };
+}
+
 export async function listPresences(chamadaId, { page, limit, search }) {
   await findById(chamadaId);
   const where = { chamadaId, ...(search && { aluno: { nomeCompleto: { contains: search } } }) };

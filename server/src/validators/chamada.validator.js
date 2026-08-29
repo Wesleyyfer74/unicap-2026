@@ -20,6 +20,13 @@ export const chamadaDetailsSchema = z.object({ params: idSchema, query: z.object
 }).strict() });
 export const createPresencaSchema = z.object({ params: idSchema, body: z.object({ uuid: z.string().uuid('UUID inválido') }).strict() });
 export const scannerAlunoSchema = z.object({ params: idSchema.extend({ uuid: z.string().uuid('UUID inválido') }) });
+export const searchAlunosChamadaSchema = z.object({
+  params: idSchema,
+  query: z.object({
+    search: z.string().trim().min(2, 'Digite pelo menos 2 caracteres').max(191, 'Pesquisa muito longa'),
+    limit: z.coerce.number().int().min(1).max(20).default(10),
+  }).strict(),
+});
 export const listPresencasChamadaSchema = z.object({ params: idSchema, query: z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().min(1).max(50).default(10),
