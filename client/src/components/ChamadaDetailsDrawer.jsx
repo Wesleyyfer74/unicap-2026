@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { chamadaService } from '../services/chamada.service';
 import { ocorrenciaService } from '../services/ocorrencia.service';
+import { TRANSPORT_SHIFT_LABELS } from '../utils/transportShifts';
 
-const labels = { MATUTINO: 'Matutino', INTEGRAL: 'Integral', NOTURNO: 'Noturno', ABERTA: 'Aberta', FINALIZADA: 'Finalizada' };
+const labels = { ...TRANSPORT_SHIFT_LABELS, ABERTA: 'Aberta', FINALIZADA: 'Finalizada' };
 const formatDate = (value) => value ? new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(value)) : 'Não informado';
 const formatDateTime = (value) => value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) : 'Não informado';
 const formatTime = (value) => value ? new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(new Date(value)) : 'Não informado';
@@ -89,7 +90,7 @@ export default function ChamadaDetailsDrawer({ chamada, initialPresences, initia
       {chamada && <div className="drawer-content"><section className="drawer-detail-grid" aria-label="Informações da chamada">
         <div><span>Data</span><strong>{formatDate(chamada.data)}</strong></div>
         <div><span>Fiscal</span><strong>{chamada.fiscal.nome}</strong></div>
-        <div><span>Turno</span><strong>{labels[chamada.turno]}</strong></div>
+        <div><span>Linha / Turno</span><strong>{labels[chamada.turno]}</strong></div>
         <div><span>Cor do ônibus</span><strong>{chamada.corOnibus}</strong></div>
         <div><span>Motorista</span><strong>{chamada.viagem?.nomeMotorista || 'Não informado'}</strong></div>
         <div><span>Status</span><strong className={`status ${chamada.status === 'ABERTA' ? 'active' : 'inactive'}`}>{labels[chamada.status]}</strong></div>

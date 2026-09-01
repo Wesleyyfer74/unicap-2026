@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ALL_SHIFT_VALUES } from '../utils/transport-shifts.js';
 
 const idParams = z.object({ id: z.coerce.number().int().positive('ID inválido') }).strict();
 const observation = z.object({ observacao: z.string().trim().min(3, 'Observação é obrigatória').max(5000, 'Observação muito longa') }).strict();
@@ -17,6 +18,6 @@ export const listOcorrenciasSchema = z.object({ query: z.object({
   fiscal: z.string().trim().max(191).optional().default(''),
   dataInicio: z.string().date().optional(),
   dataFim: z.string().date().optional(),
-  turno: z.enum(['MATUTINO', 'INTEGRAL', 'NOTURNO']).optional(),
+  turno: z.enum(ALL_SHIFT_VALUES).optional(),
   chamadaId: z.coerce.number().int().positive('Chamada inválida').optional(),
 }).strict() });

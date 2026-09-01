@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ALL_SHIFT_VALUES } from '../utils/transport-shifts.js';
 
 const optionalText = (max) => z.preprocess((value) => value === '' ? undefined : value, z.string().trim().max(max).optional());
 const optionalNumber = z.preprocess((value) => value === '' || value === null ? undefined : value, z.coerce.number().nonnegative().max(999999999.9).optional());
@@ -9,7 +10,7 @@ const viagemBody = z.object({
     nomeMotorista: z.string().trim().min(2, 'Nome do motorista é obrigatório').max(191),
     fiscalId: z.coerce.number().int().positive('Fiscal inválido'),
     linhaRota: optionalText(191),
-    turno: z.preprocess((value) => value === '' ? undefined : value, z.enum(['MATUTINO', 'INTEGRAL', 'NOTURNO']).optional()),
+    turno: z.preprocess((value) => value === '' ? undefined : value, z.enum(ALL_SHIFT_VALUES).optional()),
     horarioSaida: optionalTime,
     horarioChegada: optionalTime,
     hodometroSaida: optionalNumber,

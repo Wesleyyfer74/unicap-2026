@@ -4,10 +4,11 @@ import OcorrenciaFormModal from '../../components/OcorrenciaFormModal';
 import { alunoService } from '../../services/aluno.service';
 import { ocorrenciaService } from '../../services/ocorrencia.service';
 import { useAuth } from '../../hooks/useAuth';
+import { TRANSPORT_SHIFTS, TRANSPORT_SHIFT_LABELS } from '../../utils/transportShifts';
 
 const initialPagination = { page: 1, limit: 10, total: 0, totalPages: 1 };
 const emptyFilters = { aluno: '', alunoId: '', fiscal: '', dataInicio: '', dataFim: '', turno: '' };
-const shiftLabels = { MATUTINO: 'Matutino', INTEGRAL: 'Integral', NOTURNO: 'Noturno' };
+const shiftLabels = TRANSPORT_SHIFT_LABELS;
 
 export default function OcorrenciasPage() {
   const { administrador } = useAuth();
@@ -79,7 +80,7 @@ export default function OcorrenciasPage() {
         <label><span>Fiscal</span><input value={filterInput.fiscal} onChange={(event) => setFilter('fiscal', event.target.value)} /></label>
         <label><span>Data inicial</span><input type="date" value={filterInput.dataInicio} onChange={(event) => setFilter('dataInicio', event.target.value)} /></label>
         <label><span>Data final</span><input type="date" value={filterInput.dataFim} onChange={(event) => setFilter('dataFim', event.target.value)} /></label>
-        <label><span>Turno</span><select value={filterInput.turno} onChange={(event) => setFilter('turno', event.target.value)}><option value="">Todos</option><option value="MATUTINO">Matutino</option><option value="INTEGRAL">Integral</option><option value="NOTURNO">Noturno</option></select></label>
+        <label><span>Linha / Turno</span><select value={filterInput.turno} onChange={(event) => setFilter('turno', event.target.value)}><option value="">Todos</option>{TRANSPORT_SHIFTS.map((shift) => <option key={shift.value} value={shift.value}>{shift.label}</option>)}</select></label>
       </div>
       {filterInput.alunoId && <div className="occurrence-student-summary" aria-live="polite"><div><span>Aluno</span><strong>{filterInput.aluno}</strong></div><div><span>Total de ocorrências</span><strong>{loading ? '—' : pagination.total}</strong></div></div>}
       <div className="table-wrapper"><table><thead><tr><th>Aluno</th><th>Data</th><th>Fiscal</th><th>Chamada</th><th>Observação</th><th>Ações</th></tr></thead><tbody>{loading ? <tr><td colSpan="6" className="empty-state">Carregando...</td></tr> : items.length === 0 ? <tr><td colSpan="6" className="empty-state">Nenhuma ocorrência encontrada.</td></tr> : items.map((item) => <tr key={item.id}><td data-label="Aluno">{item.aluno.nomeCompleto}</td><td data-label="Data">{new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(item.chamada.data))}</td><td data-label="Fiscal">{item.fiscal.nome}</td><td data-label="Chamada">#{item.chamada.id} · {shiftLabels[item.chamada.turno]}</td><td data-label="Observação"><span className={filterInput.alunoId ? 'occurrence-note-full' : 'truncate-note'}>{item.observacao}</span></td><td data-label="Ações"><button className="text-button" onClick={() => setSelected(item)}>Detalhes</button>{isAdmin && <button className="text-button" onClick={() => setEditing(item)}>Editar</button>}</td></tr>)}</tbody></table></div>

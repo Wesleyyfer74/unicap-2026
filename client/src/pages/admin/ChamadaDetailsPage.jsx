@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import ChamadaPresencasModal from '../../components/ChamadaPresencasModal';
+import { TRANSPORT_SHIFT_LABELS } from '../../utils/transportShifts';
 import { chamadaService } from '../../services/chamada.service';
 
-const labels = { MATUTINO: 'Matutino', INTEGRAL: 'Integral', NOTURNO: 'Noturno', ABERTA: 'Aberta', FINALIZADA: 'Finalizada' };
+const labels = { ...TRANSPORT_SHIFT_LABELS, ABERTA: 'Aberta', FINALIZADA: 'Finalizada' };
 const formatDate = (value) => new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(value));
 const formatDateTime = (value) => value ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value)) : '—';
 

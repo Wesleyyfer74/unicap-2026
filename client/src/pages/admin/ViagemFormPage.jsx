@@ -4,6 +4,7 @@ import { chamadaService } from '../../services/chamada.service';
 import { fiscalService } from '../../services/fiscal.service';
 import { TRANSPORT_LINES } from '../../utils/transportLines';
 import { useAuth } from '../../hooks/useAuth';
+import { TRANSPORT_SHIFTS, TRANSPORT_SHIFT_LABELS } from '../../utils/transportShifts';
 
 const emptyForm = { nomeMotorista: '', fiscalId: '', linhaRota: '', turno: '', horarioSaida: '', horarioChegada: '', hodometroSaida: '', hodometroChegada: '' };
 
@@ -17,6 +18,7 @@ export default function ViagemFormPage() {
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const legacyShift = form.turno && !TRANSPORT_SHIFTS.some((shift) => shift.value === form.turno);
 
   useEffect(() => {
     const fiscalPromise = administrador.role === 'FISCAL'
@@ -67,7 +69,7 @@ export default function ViagemFormPage() {
       <label><span>Nome do Motorista *</span><input value={form.nomeMotorista} maxLength="191" required onChange={(event) => set('nomeMotorista', event.target.value)} /></label>
       <label><span>Fiscal *</span><select value={form.fiscalId} required disabled={administrador.role === 'FISCAL'} onChange={(event) => set('fiscalId', event.target.value)}>{fiscais.map((fiscal) => <option key={fiscal.id} value={fiscal.id}>{fiscal.nome}</option>)}</select></label>
       <label><span>Linha / Rota</span><select value={form.linhaRota} onChange={(event) => set('linhaRota', event.target.value)}><option value="">Não informado</option>{TRANSPORT_LINES.map((line) => <option key={line} value={line}>{line}</option>)}</select></label>
-      <label><span>Turno</span><select value={form.turno} onChange={(event) => set('turno', event.target.value)}><option value="">Não informado</option><option value="MATUTINO">Matutino</option><option value="INTEGRAL">Integral</option><option value="NOTURNO">Noturno</option></select></label>
+      <label><span>Linha / Turno</span><select value={form.turno} onChange={(event) => set('turno', event.target.value)}><option value="">Não informado</option>{legacyShift && <option value={form.turno}>{TRANSPORT_SHIFT_LABELS[form.turno] || form.turno}</option>}{TRANSPORT_SHIFTS.map((shift) => <option key={shift.value} value={shift.value}>{shift.label}</option>)}</select></label>
       <label><span>Horário de Saída</span><input type="time" value={form.horarioSaida} onChange={(event) => set('horarioSaida', event.target.value)} /></label>
       <label><span>Horário de Chegada</span><input type="time" value={form.horarioChegada} onChange={(event) => set('horarioChegada', event.target.value)} /></label>
       <label><span>Hodômetro de Saída</span><input type="number" min="0" step="0.1" value={form.hodometroSaida} onChange={(event) => set('hodometroSaida', event.target.value)} /></label>

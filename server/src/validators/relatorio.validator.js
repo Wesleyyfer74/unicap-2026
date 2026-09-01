@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ALL_SHIFT_VALUES } from '../utils/transport-shifts.js';
 
 export const relatorioSchema = z.object({
   query: z.object({
@@ -7,7 +8,7 @@ export const relatorioSchema = z.object({
     dataInicio: z.string().date().optional(),
     dataFim: z.string().date().optional(),
     aluno: z.string().trim().max(191).optional().default(''),
-    turno: z.enum(['MATUTINO', 'INTEGRAL', 'NOTURNO']).optional(),
+    turno: z.enum(ALL_SHIFT_VALUES).optional(),
     fiscal: z.string().trim().max(191).optional().default(''),
     motorista: z.string().trim().max(191).optional().default(''),
     corOnibus: z.string().trim().max(50).optional().default(''),

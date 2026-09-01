@@ -5,11 +5,10 @@ import Modal from "../../components/Modal";
 import ChamadaPresencasModal from "../../components/ChamadaPresencasModal";
 import AlunoNameSearchModal from "../../components/AlunoNameSearchModal";
 import { chamadaService } from "../../services/chamada.service";
+import { TRANSPORT_SHIFT_LABELS } from "../../utils/transportShifts";
 
 const labels = {
-  MATUTINO: "Matutino",
-  INTEGRAL: "Integral",
-  NOTURNO: "Noturno",
+  ...TRANSPORT_SHIFT_LABELS,
   ABERTA: "Aberta",
   FINALIZADA: "Finalizada",
 };

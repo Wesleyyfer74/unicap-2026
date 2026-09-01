@@ -148,17 +148,17 @@ describe('Fiscal e chamada', { concurrency: false }, () => {
     const disabled = await request(`/fiscais/${fiscal.id}/status`, { method: 'PATCH', body: { ativo: false } });
     assert.equal(disabled.response.status, 200);
     assert.equal(disabled.data.fiscal.ativo, false);
-    assert.equal((await request('/chamadas', { method: 'POST', body: { fiscalId: fiscal.id, turno: 'MATUTINO', corOnibus: 'Azul' } })).response.status, 400);
+    assert.equal((await request('/chamadas', { method: 'POST', body: { fiscalId: fiscal.id, turno: 'UNIGRAN_MATUTINO_INTEGRAL', corOnibus: 'Azul' } })).response.status, 400);
     await request(`/fiscais/${fiscal.id}/status`, { method: 'PATCH', body: { ativo: true } });
   });
 
   test('abre chamada com fiscal e turno válidos', async () => {
     assert.equal((await request('/chamadas', { method: 'POST', body: { fiscalId: fiscal.id, turno: 'INVALIDO', corOnibus: 'Azul' } })).response.status, 422);
-    assert.equal((await request('/chamadas', { method: 'POST', body: { fiscalId: fiscal.id, turno: 'MATUTINO' } })).response.status, 422);
-    const created = await request('/chamadas', { method: 'POST', body: { fiscalId: fiscal.id, turno: 'MATUTINO', corOnibus: 'Azul' } });
+    assert.equal((await request('/chamadas', { method: 'POST', body: { fiscalId: fiscal.id, turno: 'UNIGRAN_MATUTINO_INTEGRAL' } })).response.status, 422);
+    const created = await request('/chamadas', { method: 'POST', body: { fiscalId: fiscal.id, turno: 'UNIGRAN_MATUTINO_INTEGRAL', corOnibus: 'Azul' } });
     assert.equal(created.response.status, 201);
     assert.equal(created.data.chamada.status, 'ABERTA');
-    assert.equal(created.data.chamada.turno, 'MATUTINO');
+    assert.equal(created.data.chamada.turno, 'UNIGRAN_MATUTINO_INTEGRAL');
     assert.equal(created.data.chamada.corOnibus, 'Azul');
     chamada = created.data.chamada;
   });
@@ -228,9 +228,9 @@ describe('Viagem e ocorrência', { concurrency: false }, () => {
   test('valida hodômetro, cadastra e edita viagem', async () => {
     const invalid = await request(`/chamadas/${chamada.id}/viagem`, { method: 'POST', body: { nomeMotorista: 'Motorista Teste', fiscalId: fiscal.id, hodometroSaida: 200, hodometroChegada: 100 } });
     assert.equal(invalid.response.status, 422);
-    const created = await request(`/chamadas/${chamada.id}/viagem`, { method: 'POST', body: { nomeMotorista: 'Motorista Teste', fiscalId: fiscal.id, linhaRota: 'Linha Azul', turno: 'MATUTINO', horarioSaida: '07:00', horarioChegada: '08:00', hodometroSaida: 100, hodometroChegada: 125 } });
+    const created = await request(`/chamadas/${chamada.id}/viagem`, { method: 'POST', body: { nomeMotorista: 'Motorista Teste', fiscalId: fiscal.id, linhaRota: 'Linha Azul', turno: 'UNIGRAN_MATUTINO_INTEGRAL', horarioSaida: '07:00', horarioChegada: '08:00', hodometroSaida: 100, hodometroChegada: 125 } });
     assert.equal(created.response.status, 201);
-    const edited = await request(`/chamadas/${chamada.id}/viagem`, { method: 'PUT', body: { nomeMotorista: 'Motorista Editado', fiscalId: fiscal.id, linhaRota: 'Linha Verde', turno: 'MATUTINO', horarioSaida: '07:10', horarioChegada: '08:10', hodometroSaida: 101, hodometroChegada: 128 } });
+    const edited = await request(`/chamadas/${chamada.id}/viagem`, { method: 'PUT', body: { nomeMotorista: 'Motorista Editado', fiscalId: fiscal.id, linhaRota: 'Linha Verde', turno: 'UNIGRAN_MATUTINO_INTEGRAL', horarioSaida: '07:10', horarioChegada: '08:10', hodometroSaida: 101, hodometroChegada: 128 } });
     assert.equal(edited.response.status, 200);
     assert.equal(edited.data.viagem.nomeMotorista, 'Motorista Editado');
   });
@@ -284,10 +284,10 @@ describe('Relatórios e PDF', { concurrency: false }, () => {
     const cases = [
       { aluno: 'Aluno Principal' },
       { fiscal: 'Fiscal Editado' },
-      { turno: 'MATUTINO' },
+      { turno: 'UNIGRAN_MATUTINO_INTEGRAL' },
       { motorista: 'Motorista Editado' },
       { corOnibus: 'Azul' },
-      { aluno: 'Aluno Principal', fiscal: 'Fiscal Editado', turno: 'MATUTINO', motorista: 'Motorista Editado' },
+      { aluno: 'Aluno Principal', fiscal: 'Fiscal Editado', turno: 'UNIGRAN_MATUTINO_INTEGRAL', motorista: 'Motorista Editado' },
       { fiscal: 'Fiscal inexistente' },
       { aluno: 'Não Existe' },
     ];

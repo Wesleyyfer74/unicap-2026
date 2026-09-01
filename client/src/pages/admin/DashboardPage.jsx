@@ -3,11 +3,10 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { dashboardService } from "../../services/dashboard.service";
 import SystemHelpModal from "../../components/SystemHelpModal";
+import { TRANSPORT_SHIFT_LABELS } from "../../utils/transportShifts";
 
 const labels = {
-  MATUTINO: "Matutino",
-  INTEGRAL: "Integral",
-  NOTURNO: "Noturno",
+  ...TRANSPORT_SHIFT_LABELS,
   ABERTA: "Aberta",
   FINALIZADA: "Finalizada",
 };
@@ -159,7 +158,7 @@ export default function DashboardPage() {
                 <tr>
                   <th>Data</th>
                   <th>Fiscal</th>
-                  <th>Turno</th>
+                  <th>Linha / Turno</th>
                   <th>Alunos</th>
                   <th>Status</th>
                 </tr>
@@ -176,7 +175,7 @@ export default function DashboardPage() {
                     <tr key={call.id}>
                       <td data-label="Data">{formatDate(call.data)}</td>
                       <td data-label="Fiscal">{call.fiscal.nome}</td>
-                      <td data-label="Turno">{labels[call.turno]}</td>
+                      <td data-label="Linha / Turno">{labels[call.turno]}</td>
                       <td data-label="Alunos">{call._count.presencas}</td>
                       <td data-label="Status">
                         <span

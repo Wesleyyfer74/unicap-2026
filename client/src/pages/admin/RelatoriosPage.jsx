@@ -3,10 +3,11 @@ import ChamadaDetailsDrawer from '../../components/ChamadaDetailsDrawer';
 import { chamadaService } from '../../services/chamada.service';
 import { relatorioService } from '../../services/relatorio.service';
 import { BUS_COLORS } from '../../utils/busColors';
+import { TRANSPORT_SHIFTS, TRANSPORT_SHIFT_LABELS } from '../../utils/transportShifts';
 
 const emptyFilters = { dataInicio: '', dataFim: '', aluno: '', turno: '', fiscal: '', motorista: '', corOnibus: '' };
 const initialPagination = { page: 1, limit: 20, total: 0, totalPages: 1 };
-const shiftLabels = { MATUTINO: 'Matutino', INTEGRAL: 'Integral', NOTURNO: 'Noturno' };
+const shiftLabels = TRANSPORT_SHIFT_LABELS;
 const statusLabels = { ABERTA: 'Aberta', FINALIZADA: 'Finalizada' };
 const quantityLabel = (value, singular, plural) => `${value} ${value === 1 ? singular : plural}`;
 
@@ -142,7 +143,7 @@ export default function RelatoriosPage() {
         <label><span>Data inicial</span><input type="date" value={form.dataInicio} onChange={(event) => change('dataInicio', event.target.value)} /></label>
         <label><span>Data final</span><input type="date" value={form.dataFim} onChange={(event) => change('dataFim', event.target.value)} /></label>
         <label><span>Aluno</span><input maxLength="191" value={form.aluno} onChange={(event) => change('aluno', event.target.value)} /></label>
-        <label><span>Turno</span><select value={form.turno} onChange={(event) => change('turno', event.target.value)}><option value="">Todos</option><option value="MATUTINO">Matutino</option><option value="INTEGRAL">Integral</option><option value="NOTURNO">Noturno</option></select></label>
+        <label><span>Linha / Turno</span><select value={form.turno} onChange={(event) => change('turno', event.target.value)}><option value="">Todos</option>{TRANSPORT_SHIFTS.map((shift) => <option key={shift.value} value={shift.value}>{shift.label}</option>)}</select></label>
         <label><span>Fiscal</span><input maxLength="191" value={form.fiscal} onChange={(event) => change('fiscal', event.target.value)} /></label>
         <label><span>Motorista</span><input maxLength="191" value={form.motorista} onChange={(event) => change('motorista', event.target.value)} /></label>
         <label><span>Cor do ônibus</span><select value={form.corOnibus} onChange={(event) => change('corOnibus', event.target.value)}><option value="">Todas</option>{BUS_COLORS.map((color) => <option key={color} value={color}>{color}</option>)}</select></label>
@@ -154,11 +155,11 @@ export default function RelatoriosPage() {
     {success && <div className="feedback success" role="status"><span>{success}</span><button type="button" aria-label="Fechar mensagem" onClick={() => setSuccess('')}>×</button></div>}
     <section className="card report-results">
       <header className="report-heading"><div><h2>Chamadas</h2><p>{pagination.total} chamada(s) encontrada(s)</p></div><button type="button" className="button button-primary" disabled={exporting || loading} onClick={exportPdf}>{exporting ? 'Gerando PDF...' : 'Exportar PDF'}</button></header>
-      <div className="table-wrapper"><table><thead><tr><th>Data</th><th>Fiscal</th><th>Turno</th><th>Cor do ônibus</th><th>Motorista</th><th>Alunos</th><th>Ocorrências</th><th>Status</th><th>Ações</th></tr></thead><tbody>
+      <div className="table-wrapper"><table><thead><tr><th>Data</th><th>Fiscal</th><th>Linha / Turno</th><th>Cor do ônibus</th><th>Motorista</th><th>Alunos</th><th>Ocorrências</th><th>Status</th><th>Ações</th></tr></thead><tbody>
         {loading ? <tr><td colSpan="9" className="empty-state">Carregando...</td></tr> : items.length === 0 ? <tr><td colSpan="9" className="empty-state">Nenhuma chamada encontrada.</td></tr> : items.map((item) => <tr key={item.id} className="report-call-row" tabIndex="0" role="button" aria-label={`Ver detalhes da chamada ${item.id}`} onClick={() => openDetails(item.id)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openDetails(item.id); } }}>
           <td data-label="Data">{formatDate(item.data)}</td>
           <td data-label="Fiscal">{item.fiscal.nome}</td>
-          <td data-label="Turno">{shiftLabels[item.turno]}</td>
+          <td data-label="Linha / Turno">{shiftLabels[item.turno]}</td>
           <td data-label="Cor do ônibus">{item.corOnibus}</td>
           <td data-label="Motorista">{item.motorista || '—'}</td>
           <td data-label="Alunos"><strong>{quantityLabel(item.totalAlunos, 'aluno', 'alunos')}</strong></td>

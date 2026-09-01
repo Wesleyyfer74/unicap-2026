@@ -1,18 +1,19 @@
 import PDFDocument from 'pdfkit';
 import { env } from '../config/env.js';
 import { countReport, getReportBatch } from './relatorio.service.js';
+import { TRANSPORT_SHIFT_LABELS } from '../utils/transport-shifts.js';
 
-const shifts = { MATUTINO: 'Matutino', INTEGRAL: 'Integral', NOTURNO: 'Noturno' };
+const shifts = TRANSPORT_SHIFT_LABELS;
 const columns = [
   { key: 'data', label: 'Data', width: 50 },
-  { key: 'aluno', label: 'Aluno', width: 120 },
-  { key: 'turno', label: 'Turno', width: 55 },
-  { key: 'corOnibus', label: 'Ônibus', width: 55 },
-  { key: 'fiscal', label: 'Fiscal', width: 95 },
-  { key: 'horario', label: 'Horário', width: 50 },
-  { key: 'motorista', label: 'Motorista', width: 95 },
-  { key: 'rota', label: 'Rota', width: 85 },
-  { key: 'ocorrencias', label: 'Ocorrências', width: 165 },
+  { key: 'aluno', label: 'Aluno', width: 105 },
+  { key: 'turno', label: 'Linha / Turno', width: 115 },
+  { key: 'corOnibus', label: 'Ônibus', width: 45 },
+  { key: 'fiscal', label: 'Fiscal', width: 75 },
+  { key: 'horario', label: 'Horário', width: 45 },
+  { key: 'motorista', label: 'Motorista', width: 75 },
+  { key: 'rota', label: 'Rota', width: 75 },
+  { key: 'ocorrencias', label: 'Ocorrências', width: 185 },
 ];
 
 function formatDate(value) {
@@ -39,7 +40,7 @@ function formatTime(value) {
 function filterDescription(filters) {
   const values = [];
   if (filters.aluno) values.push(`Aluno: ${filters.aluno}`);
-  if (filters.turno) values.push(`Turno: ${shifts[filters.turno]}`);
+  if (filters.turno) values.push(`Linha / Turno: ${shifts[filters.turno]}`);
   if (filters.fiscal) values.push(`Fiscal: ${filters.fiscal}`);
   if (filters.motorista) values.push(`Motorista: ${filters.motorista}`);
   if (filters.corOnibus) values.push(`Ônibus: ${filters.corOnibus}`);

@@ -1,14 +1,16 @@
 import { z } from 'zod';
+import { ALL_SHIFT_VALUES, TRANSPORT_SHIFT_VALUES } from '../utils/transport-shifts.js';
 
 const idSchema = z.object({ id: z.coerce.number().int().positive('ID inválido') }).strict();
-const turnoSchema = z.enum(['MATUTINO', 'INTEGRAL', 'NOTURNO']);
+const turnoSchema = z.enum(TRANSPORT_SHIFT_VALUES);
+const turnoFilterSchema = z.enum(ALL_SHIFT_VALUES);
 const corOnibusSchema = z.string().trim().min(2, 'Selecione a cor do ônibus').max(50, 'Cor do ônibus muito longa');
 
 export const listChamadasSchema = z.object({ query: z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().min(1).max(50).default(10),
   fiscalId: z.coerce.number().int().positive().optional(),
-  turno: turnoSchema.optional(),
+  turno: turnoFilterSchema.optional(),
   status: z.enum(['ABERTA', 'FINALIZADA']).optional(),
   data: z.string().date().optional(),
 }).strict() });
