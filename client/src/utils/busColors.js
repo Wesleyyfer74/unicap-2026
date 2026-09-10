@@ -4,4 +4,6 @@ export const BUS_COLORS = [
   'Laranja',
   'Van',
   'BEN10',
+  'VAN FURTADO',
+  'ÔNIBUS FURTADO',
 ];
