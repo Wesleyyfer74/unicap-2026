@@ -216,13 +216,6 @@ describe('Fiscal e chamada', { concurrency: false }, () => {
     assert.equal((await request('/fiscais/arquivados?search=Fiscal%20Sem%20Histórico')).data.pagination.total, 1);
   });
 
-  test('exclui apenas chamada aberta sem registros', async () => {
-    const created = await request('/chamadas', { method: 'POST', body: { fiscalId: fiscal.id, turno: 'UFGD_NOTURNO', corOnibus: 'ÔNIBUS FURTADO' } });
-    assert.equal(created.response.status, 201);
-    assert.equal((await request(`/chamadas/${created.data.chamada.id}`, { method: 'DELETE' })).response.status, 204);
-    assert.equal((await request(`/chamadas/${chamada.id}`, { method: 'DELETE' })).response.status, 409);
-  });
-
   test('arquiva aluno sem apagar seu cadastro', async () => {
     const disposable = await request('/alunos', { method: 'POST', body: { nomeCompleto: 'Aluno Sem Histórico' } });
     assert.equal(disposable.response.status, 201);
@@ -349,5 +342,22 @@ describe('Relatórios e PDF', { concurrency: false }, () => {
     assert.equal(report.data.pagination.total, 1);
     assert.equal(report.data.items.length, 1);
     assert.ok(report.data.items[0].totalAlunos >= 120);
+  });
+});
+
+describe('Administração de chamadas finalizadas', { concurrency: false }, () => {
+  test('administrador edita e exclui uma chamada finalizada com seus registros', async () => {
+    const created = await request('/chamadas', { method: 'POST', body: { fiscalId: fiscal.id, turno: 'UFGD_NOTURNO', corOnibus: 'ÔNIBUS FURTADO' } });
+    assert.equal(created.response.status, 201);
+    const callId = created.data.chamada.id;
+    assert.equal((await request(`/chamadas/${callId}/presencas`, { method: 'POST', body: { uuid: aluno.uuid } })).response.status, 201);
+    assert.equal((await request(`/chamadas/${callId}/finalizar`, { method: 'PATCH' })).response.status, 200);
+    const edited = await request(`/chamadas/${callId}`, { method: 'PUT', body: { fiscalId: fiscal.id, turno: 'IFMS_MATUTINO', corOnibus: 'VAN FURTADO' } });
+    assert.equal(edited.response.status, 200);
+    assert.equal(edited.data.chamada.status, 'FINALIZADA');
+    assert.equal(edited.data.chamada.corOnibus, 'VAN FURTADO');
+    assert.equal((await request(`/chamadas/${callId}`, { method: 'DELETE' })).response.status, 204);
+    assert.equal((await request(`/chamadas/${callId}`)).response.status, 404);
+    assert.equal(await prisma.presenca.count({ where: { chamadaId: callId } }), 0);
   });
 });
