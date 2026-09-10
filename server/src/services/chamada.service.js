@@ -70,6 +70,24 @@ export async function create({ fiscalId, turno, corOnibus }) {
   });
 }
 
+export async function update(id, { fiscalId, turno, corOnibus }) {
+  const chamada = await findById(id);
+  if (chamada.status !== 'ABERTA') throw new AppError('Chamadas finalizadas não podem ser editadas', 409);
+  const fiscal = await prisma.fiscal.findFirst({ where: { id: fiscalId, deletedAt: null }, select: { ativo: true } });
+  if (!fiscal) throw new AppError('Fiscal não encontrado', 404);
+  if (!fiscal.ativo) throw new AppError('Não é possível atribuir uma chamada a fiscal inativo', 400);
+  return prisma.chamada.update({ where: { id }, data: { fiscalId, turno, corOnibus }, select: detailSelect });
+}
+
+export async function remove(id) {
+  const chamada = await findById(id);
+  if (chamada.status !== 'ABERTA') throw new AppError('Chamadas finalizadas não podem ser excluídas', 409);
+  if (chamada._count.presencas || chamada._count.ocorrencias || chamada.viagem) {
+    throw new AppError('Esta chamada possui registros e não pode ser excluída', 409);
+  }
+  await prisma.chamada.delete({ where: { id } });
+}
+
 export async function finish(id) {
   const chamada = await findById(id);
   if (chamada.status === 'FINALIZADA') throw new AppError('Chamada já finalizada', 409);

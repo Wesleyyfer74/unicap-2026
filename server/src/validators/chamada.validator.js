@@ -15,6 +15,7 @@ export const listChamadasSchema = z.object({ query: z.object({
   data: z.string().date().optional(),
 }).strict() });
 export const createChamadaSchema = z.object({ body: z.object({ fiscalId: z.coerce.number().int().positive('Fiscal inválido'), turno: turnoSchema, corOnibus: corOnibusSchema }).strict() });
+export const updateChamadaSchema = z.object({ params: idSchema, body: z.object({ fiscalId: z.coerce.number().int().positive('Fiscal inválido'), turno: turnoSchema, corOnibus: corOnibusSchema }).strict() });
 export const chamadaIdSchema = z.object({ params: idSchema });
 export const chamadaDetailsSchema = z.object({ params: idSchema, query: z.object({
   presencasLimit: z.coerce.number().int().min(1).max(50).default(20),
