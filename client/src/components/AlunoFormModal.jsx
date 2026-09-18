@@ -50,7 +50,7 @@ export default function AlunoFormModal({ aluno, saving, onSave, onClose }) {
           value={cpf}
           onChange={(event) => changeCpf(event.target.value)}
         />
-        {aluno && <p className="field-help">O UUID não pode ser alterado.</p>}
+        {aluno && <p className="field-help">O UUID não pode ser alterado. Se este CPF estiver apenas em um cadastro arquivado, ele será liberado para este aluno.</p>}
         {error && (
           <div className="form-error" role="alert">
             {error}

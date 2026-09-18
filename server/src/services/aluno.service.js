@@ -13,12 +13,14 @@ const searchWhere = (search) => {
     : { nomeCompleto: { contains: search } };
 };
 
-async function cpfData(cpf, ignoredId) {
+async function cpfData(cpf, ignoredId, database = prisma) {
   if (!cpf) return {};
   if (!isValidCpf(cpf)) throw new AppError('Informe um CPF válido', 422);
   const cpfHash = hashCpf(cpf);
-  const existing = await prisma.aluno.findFirst({ where: { cpfHash, ...(ignoredId && { id: { not: ignoredId } }) }, select: { id: true } });
-  if (existing) throw new AppError('CPF já cadastrado para outro aluno', 409);
+  const existing = await database.aluno.findFirst({ where: { cpfHash, ...(ignoredId && { id: { not: ignoredId } }) }, select: { id: true, deletedAt: true } });
+  if (existing?.deletedAt) {
+    await database.aluno.update({ where: { id: existing.id }, data: { cpfHash: null, cpfEncrypted: null } });
+  } else if (existing) throw new AppError('CPF já cadastrado para outro aluno', 409);
   return { cpfHash, cpfEncrypted: encryptCpf(cpf) };
 }
 
@@ -63,9 +65,16 @@ export async function findPublicByCpf(cpf) {
 }
 
 export async function update(id, { nomeCompleto, cpf }) {
-  await findById(id);
-  const aluno = await prisma.aluno.update({ where: { id }, data: { nomeCompleto, ...(await cpfData(cpf, id)) }, select: alunoSelect });
-  return toAdminAluno(aluno);
+  return prisma.$transaction(async (transaction) => {
+    const existing = await transaction.aluno.findFirst({ where: { id, deletedAt: null }, select: { id: true } });
+    if (!existing) throw new AppError('Aluno não encontrado', 404);
+    const aluno = await transaction.aluno.update({
+      where: { id },
+      data: { nomeCompleto, ...(await cpfData(cpf, id, transaction)) },
+      select: alunoSelect,
+    });
+    return toAdminAluno(aluno);
+  });
 }
 
 export async function updateStatus(id, ativo, motivo) {

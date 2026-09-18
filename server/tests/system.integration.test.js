@@ -226,6 +226,19 @@ describe('Fiscal e chamada', { concurrency: false }, () => {
     assert.equal((await request('/alunos?search=Aluno%20Sem%20Histórico')).data.pagination.total, 0);
     assert.equal((await request('/alunos/arquivados?search=Aluno%20Sem%20Histórico')).data.pagination.total, 1);
   });
+
+  test('libera CPF que esteja vinculado somente a aluno arquivado', async () => {
+    const archived = await request('/alunos', { method: 'POST', body: { nomeCompleto: 'Cadastro Arquivado CPF', cpf: '045.499.261-04' } });
+    assert.equal(archived.response.status, 201);
+    assert.equal((await request(`/alunos/${archived.data.aluno.id}`, { method: 'DELETE' })).response.status, 204);
+    const target = await request('/alunos', { method: 'POST', body: { nomeCompleto: 'Cadastro Corrigido CPF' } });
+    const updated = await request(`/alunos/${target.data.aluno.id}`, { method: 'PUT', body: { nomeCompleto: 'Cadastro Corrigido CPF', cpf: '045.499.261-04' } });
+    assert.equal(updated.response.status, 200);
+    assert.equal(updated.data.aluno.cpf, '045.499.261-04');
+    const archivedRecord = await prisma.aluno.findUnique({ where: { id: archived.data.aluno.id }, select: { cpfHash: true, cpfEncrypted: true } });
+    assert.equal(archivedRecord.cpfHash, null);
+    assert.equal(archivedRecord.cpfEncrypted, null);
+  });
 });
 
 describe('Viagem e ocorrência', { concurrency: false }, () => {
