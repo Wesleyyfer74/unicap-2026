@@ -85,7 +85,7 @@ function drawRow(doc, item, striped) {
   doc.font('Helvetica').fontSize(7.2);
   const heights = columns.map((column) => doc.heightOfString(values[column.key], { width: column.width - 6, lineGap: 1 }));
   const height = Math.max(22, Math.min(54, Math.max(...heights) + 8));
-  if (doc.y + height > 548) {
+  if (doc.y + height > 528) {
     doc.addPage();
     drawTableHeader(doc);
   }
@@ -111,8 +111,8 @@ function addFooters(doc) {
   for (let index = range.start; index < range.start + range.count; index += 1) {
     doc.switchToPage(index);
     doc.font('Helvetica').fontSize(7.5).fillColor('#667387');
-    doc.text('Sistema de Transporte Escolar', 36, 565, { width: 300, lineBreak: false });
-    doc.text(`Página ${index + 1} de ${range.count}`, 506, 565, { width: 300, align: 'right', lineBreak: false });
+    doc.text('Sistema de Transporte Escolar', 36, 545, { width: 300, lineBreak: false });
+    doc.text(`Página ${index + 1} de ${range.count}`, 506, 545, { width: 300, align: 'right', lineBreak: false });
   }
 }
 

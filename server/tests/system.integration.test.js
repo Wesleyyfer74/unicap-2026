@@ -351,6 +351,7 @@ describe('Relatórios e PDF', { concurrency: false }, () => {
     assert.ok(result.data.length > 10000);
     const pageObjects = result.data.toString('latin1').match(/\/Type \/Page\b/g) || [];
     assert.ok(pageObjects.length > 1, 'O PDF volumoso deve possuir mais de uma página');
+    assert.ok(pageObjects.length <= 10, `O PDF não deve conter páginas extras: ${pageObjects.length} páginas para 120 registros`);
     const report = await request('/relatorios?aluno=Aluno%20Volume&limit=50');
     assert.equal(report.data.pagination.total, 1);
     assert.equal(report.data.items.length, 1);
