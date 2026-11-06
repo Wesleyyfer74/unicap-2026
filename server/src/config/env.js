@@ -15,7 +15,7 @@ const schema = z.object({
   TRUST_PROXY: z.enum(['true', 'false']).default('false').transform((value) => value === 'true'),
   APP_TIMEZONE: z.string().default('America/Sao_Paulo'),
   DEV_ACCESS_USERNAME: z.string().trim().min(3).optional(),
-  DEV_ACCESS_PASSWORD: z.string().min(8).optional(),
+  DEV_ACCESS_PASSWORD: z.string().min(7).optional(),
 }).superRefine((values, context) => {
   if (values.NODE_ENV === 'production' && !values.FRONTEND_URL) {
     context.addIssue({ code: 'custom', path: ['FRONTEND_URL'], message: 'FRONTEND_URL é obrigatória em produção' });
