@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import AccessTelemetry from '../components/AccessTelemetry';
 import PublicLayout from '../layouts/PublicLayout';
 import AdminLayout from '../layouts/AdminLayout';
 import HomePage from '../pages/HomePage.jsx';
@@ -16,14 +17,16 @@ import ChamadaDetailsPage from '../pages/admin/ChamadaDetailsPage';
 import ViagemFormPage from '../pages/admin/ViagemFormPage';
 import OcorrenciasPage from '../pages/admin/OcorrenciasPage';
 import RelatoriosPage from '../pages/admin/RelatoriosPage';
+import DevSecurityPage from '../pages/dev/DevSecurityPage';
 
 const ChamadaScannerPage = lazy(() => import('../pages/admin/ChamadaScannerPage'));
 
 export default function AppRoutes() {
-  return <BrowserRouter><Routes>
+  return <BrowserRouter><AccessTelemetry /><Routes>
     <Route element={<PublicLayout />}><Route path="/" element={<HomePage />} /></Route>
     <Route path="/admin/login" element={<LoginPage />} />
     <Route path="/fiscal/login" element={<FiscalLoginPage />} />
+    <Route path="/dev" element={<DevSecurityPage />} />
     <Route element={<ProtectedRoute />}>
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<RoleHomeRedirect />} />

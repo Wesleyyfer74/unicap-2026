@@ -1,0 +1,20 @@
+CREATE TABLE `registros_seguranca` (
+  `id` INTEGER NOT NULL AUTO_INCREMENT,
+  `tipo` VARCHAR(50) NOT NULL,
+  `caminho` VARCHAR(500) NULL,
+  `metodo` VARCHAR(10) NULL,
+  `ip` VARCHAR(64) NULL,
+  `userAgent` VARCHAR(1000) NULL,
+  `dispositivo` VARCHAR(191) NULL,
+  `sistema` VARCHAR(100) NULL,
+  `navegador` VARCHAR(100) NULL,
+  `usuarioId` INTEGER NULL,
+  `usuarioNome` VARCHAR(191) NULL,
+  `perfil` VARCHAR(20) NULL,
+  `sucesso` BOOLEAN NOT NULL DEFAULT true,
+  `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  INDEX `registros_seguranca_createdAt_idx` (`createdAt`),
+  INDEX `registros_seguranca_tipo_createdAt_idx` (`tipo`, `createdAt`),
+  INDEX `registros_seguranca_ip_createdAt_idx` (`ip`, `createdAt`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

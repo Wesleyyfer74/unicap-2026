@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import * as controller from '../controllers/seguranca.controller.js';
+import { authenticateDeveloper } from '../middlewares/dev-auth.middleware.js';
+import { validate } from '../middlewares/validate.middleware.js';
+import { accessSchema, devLoginSchema, listSecuritySchema } from '../validators/seguranca.validator.js';
+const router = Router();
+router.post('/dev/login', validate(devLoginSchema), controller.developerLogin);
+router.post('/access', validate(accessSchema), controller.access);
+router.get('/acessos', authenticateDeveloper, validate(listSecuritySchema), controller.list);
+export default router;

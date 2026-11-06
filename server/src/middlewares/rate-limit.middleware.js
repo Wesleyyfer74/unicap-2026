@@ -26,3 +26,10 @@ export const publicRegistrationLimiter = rateLimit({
   limit: 10,
   message: { message: 'Limite de cadastros atingido. Tente novamente mais tarde.' },
 });
+
+export const accessTelemetryLimiter = rateLimit({
+  ...common,
+  windowMs: 15 * 60 * 1000,
+  limit: 120,
+  message: { message: 'Limite de registros de acesso atingido.' },
+});

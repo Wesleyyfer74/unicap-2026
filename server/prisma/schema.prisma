@@ -38,6 +38,28 @@ model Administrador {
   @@map("administradores")
 }
 
+model RegistroSeguranca {
+  id         Int      @id @default(autoincrement())
+  tipo       String   @db.VarChar(50)
+  caminho    String?  @db.VarChar(500)
+  metodo     String?  @db.VarChar(10)
+  ip         String?  @db.VarChar(64)
+  userAgent  String?  @db.VarChar(1000)
+  dispositivo String? @db.VarChar(191)
+  sistema    String?  @db.VarChar(100)
+  navegador  String?  @db.VarChar(100)
+  usuarioId  Int?
+  usuarioNome String? @db.VarChar(191)
+  perfil     String?  @db.VarChar(20)
+  sucesso    Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([tipo, createdAt])
+  @@index([ip, createdAt])
+  @@map("registros_seguranca")
+}
+
 model Fiscal {
   id          Int          @id @default(autoincrement())
   nome        String       @db.VarChar(191)
